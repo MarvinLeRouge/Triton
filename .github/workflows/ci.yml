@@ -36,9 +36,12 @@ jobs:
         run: uv run mypy engine api
 
       - name: Test — pytest with coverage
-        # Exit code 5 = no tests collected; acceptable while suite is being built (phase-1).
-        # Remove the `|| [ $? -eq 5 ]` guard once branch engine-grid is merged.
-        run: uv run pytest --cov=engine --cov=api --cov-report=xml; code=$?; [ $code -eq 0 ] || [ $code -eq 5 ]
+        # Exit code 5 = no tests collected; acceptable while suite is being built.
+        # `||` prevents bash set -e from exiting before we can inspect the code.
+        # Remove the guard (keep just the pytest line) once engine-grid tests land.
+        run: |
+          uv run pytest --cov=engine --cov=api --cov-report=xml || pytest_exit=$?
+          [ "${pytest_exit:-0}" -eq 0 ] || [ "${pytest_exit:-0}" -eq 5 ]
 
       - name: Upload coverage to Codecov
         if: hashFiles('coverage.xml') != ''
