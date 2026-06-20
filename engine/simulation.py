@@ -74,8 +74,7 @@ class Simulation:
 
     def _detects_any(self) -> bool:
         return any(
-            d.row == self._red_vessel.row and d.col == self._red_vessel.col
-            for d in self._drones
+            d.row == self._red_vessel.row and d.col == self._red_vessel.col for d in self._drones
         )
 
     def _in_mothership_range(self) -> bool:

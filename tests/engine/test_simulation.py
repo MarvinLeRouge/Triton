@@ -107,7 +107,9 @@ def test_in_range_without_detection_stays_in_progress() -> None:
 
 def test_blue_wins_when_all_conditions_met() -> None:
     # mothership (0,0), red (0,4) → Chebyshev = 4 ≤ 5 → à portée
-    sim, m, d, v = _make(m_pos=(0, 0), v_pos=(0, 4), mothership_range=5, lock_turns=2, engagement_turns=2)
+    sim, m, d, v = _make(
+        m_pos=(0, 0), v_pos=(0, 4), mothership_range=5, lock_turns=2, engagement_turns=2
+    )
     d.move(0, 4)  # même cellule que red → détection
     sim.advance()  # detection_streak=1, engagement_streak=1
     assert sim.advance() is GameResult.BLUE_WINS  # streaks=2 ≥ seuils
@@ -120,8 +122,10 @@ def test_blue_wins_require_lock_before_engagement() -> None:
     )
     d.move(0, 4)
     assert sim.advance() is GameResult.IN_PROGRESS  # streaks=1
-    assert sim.advance() is GameResult.IN_PROGRESS  # detection=2, engagement=2 → engagement ok mais lock pas encore
-    assert sim.advance() is GameResult.BLUE_WINS    # detection=3, engagement=3
+    assert (
+        sim.advance() is GameResult.IN_PROGRESS
+    )  # detection=2, engagement=2 → engagement ok mais lock pas encore
+    assert sim.advance() is GameResult.BLUE_WINS  # detection=3, engagement=3
 
 
 # ---------------------------------------------------------------------------
@@ -134,12 +138,12 @@ def test_detection_streak_resets_on_lost_contact() -> None:
         m_pos=(0, 0), v_pos=(0, 4), mothership_range=5, lock_turns=3, engagement_turns=3
     )
     d.move(0, 4)
-    sim.advance()       # detection_streak=1
-    d.move(1, 1)        # perte de contact
-    sim.advance()       # detection_streak=0
-    d.move(0, 4)        # recontact
-    sim.advance()       # detection_streak=1
-    sim.advance()       # detection_streak=2 → encore insuffisant (besoin 3)
+    sim.advance()  # detection_streak=1
+    d.move(1, 1)  # perte de contact
+    sim.advance()  # detection_streak=0
+    d.move(0, 4)  # recontact
+    sim.advance()  # detection_streak=1
+    sim.advance()  # detection_streak=2 → encore insuffisant (besoin 3)
     assert sim.result is GameResult.IN_PROGRESS
 
 
@@ -149,10 +153,10 @@ def test_engagement_streak_resets_when_out_of_range() -> None:
     sim, m, d, v = _make(
         m_pos=(0, 0), v_pos=(0, 4), mothership_range=4, lock_turns=2, engagement_turns=2
     )
-    d.move(0, 4)        # détection
-    sim.advance()       # detection_streak=1, engagement_streak=1
-    m.move(0, 9)        # mothership hors portée
-    sim.advance()       # detection_streak=2 ≥ lock, mais engagement_streak=0 → reset
+    d.move(0, 4)  # détection
+    sim.advance()  # detection_streak=1, engagement_streak=1
+    m.move(0, 9)  # mothership hors portée
+    sim.advance()  # detection_streak=2 ≥ lock, mais engagement_streak=0 → reset
     assert sim.result is GameResult.IN_PROGRESS
 
 
