@@ -1,0 +1,28 @@
+coverage:
+  status:
+    # Project coverage: don't fail while the test suite is being built phase by phase.
+    project:
+      default:
+        informational: true
+    # Patch coverage: enforce on backend (tests exist); informational on frontend (tests in phase-1/branch-F).
+    patch:
+      backend:
+        flags: [backend]
+        target: 80%
+        threshold: 5%
+      frontend:
+        flags: [frontend]
+        informational: true
+
+flags:
+  backend:
+    paths:
+      - engine/
+      - api/
+  frontend:
+    paths:
+      - frontend/src/
+
+comment:
+  layout: "reach,diff,flags"
+  behavior: default
