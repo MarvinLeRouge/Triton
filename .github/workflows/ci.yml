@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "phase-**"
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Lint — ruff check
+        run: uv run ruff check .
+
+      - name: Lint — ruff format
+        run: uv run ruff format --check .
+
+      - name: Type-check — mypy
+        run: uv run mypy engine api
+
+      - name: Test — pytest with coverage
+        # Exit code 5 = no tests collected; acceptable while suite is being built.
+        # `||` prevents bash set -e from exiting before we can inspect the code.
+        # Remove the guard (keep just the pytest line) once engine-grid tests land.
+        run: |
+          uv run pytest --cov=engine --cov=api --cov-report=xml || pytest_exit=$?
+          [ "${pytest_exit:-0}" -eq 0 ] || [ "${pytest_exit:-0}" -eq 5 ]
+
+      - name: Upload coverage to Codecov
+        if: hashFiles('coverage.xml') != ''
+        uses: codecov/codecov-action@v5
+        with:
+          use_oidc: true
+          flags: backend
+          files: coverage.xml
+
+  frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint — oxlint + eslint
+        run: npm run lint
+
+      - name: Type-check — vue-tsc
+        run: npm run type-check
+
+      - name: Test — vitest with coverage
+        run: npm run test:coverage -- --passWithNoTests
+
+      - name: Upload coverage to Codecov
+        if: hashFiles('frontend/coverage/coverage-final.json') != ''
+        uses: codecov/codecov-action@v5
+        with:
+          use_oidc: true
+          flags: frontend
+          directory: frontend/coverage
