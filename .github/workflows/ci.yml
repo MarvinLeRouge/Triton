@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - develop
-      - "phase-*"
+      - "phase-**"
   pull_request:
 
 jobs:
