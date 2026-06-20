@@ -36,7 +36,9 @@ jobs:
         run: uv run mypy engine api
 
       - name: Test — pytest with coverage
-        run: uv run pytest --cov=engine --cov=api --cov-report=xml
+        # Exit code 5 = no tests collected; acceptable while suite is being built (phase-1).
+        # Remove the `|| [ $? -eq 5 ]` guard once branch engine-grid is merged.
+        run: uv run pytest --cov=engine --cov=api --cov-report=xml; code=$?; [ $code -eq 0 ] || [ $code -eq 5 ]
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
