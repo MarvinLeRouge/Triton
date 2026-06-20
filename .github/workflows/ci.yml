@@ -36,12 +36,7 @@ jobs:
         run: uv run mypy engine api
 
       - name: Test — pytest with coverage
-        # Exit code 5 = no tests collected; acceptable while suite is being built.
-        # `||` prevents bash set -e from exiting before we can inspect the code.
-        # Remove the guard (keep just the pytest line) once engine-grid tests land.
-        run: |
-          uv run pytest --cov=engine --cov=api --cov-report=xml || pytest_exit=$?
-          [ "${pytest_exit:-0}" -eq 0 ] || [ "${pytest_exit:-0}" -eq 5 ]
+        run: uv run pytest --cov=engine --cov=api --cov-report=xml
 
       - name: Upload coverage to Codecov
         if: hashFiles('coverage.xml') != ''
