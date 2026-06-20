@@ -41,6 +41,7 @@ jobs:
         run: uv run pytest --cov=engine --cov=api --cov-report=xml; code=$?; [ $code -eq 0 ] || [ $code -eq 5 ]
 
       - name: Upload coverage to Codecov
+        if: hashFiles('coverage.xml') != ''
         uses: codecov/codecov-action@v5
         with:
           use_oidc: true
@@ -79,6 +80,7 @@ jobs:
         run: npm run test:coverage -- --passWithNoTests
 
       - name: Upload coverage to Codecov
+        if: hashFiles('frontend/coverage/coverage-final.json') != ''
         uses: codecov/codecov-action@v5
         with:
           use_oidc: true
