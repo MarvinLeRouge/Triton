@@ -1,0 +1,54 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    command: uv run uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./engine:/app/engine
+      - ./api:/app/api
+    networks:
+      - traefik-public
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      # REST: /api/* → FastAPI (strip /api prefix)
+      - "traefik.http.routers.triton-api-dev.rule=Host(`triton.marvinlerouge.local`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.triton-api-dev.entrypoints=web"
+      - "traefik.http.middlewares.triton-strip-api-dev.stripprefix.prefixes=/api"
+      - "traefik.http.routers.triton-api-dev.middlewares=triton-strip-api-dev"
+      - "traefik.http.routers.triton-api-dev.service=triton-backend-dev"
+      # WebSocket: /ws/* → FastAPI (pas de strip)
+      - "traefik.http.routers.triton-ws-dev.rule=Host(`triton.marvinlerouge.local`) && PathPrefix(`/ws`)"
+      - "traefik.http.routers.triton-ws-dev.entrypoints=web"
+      - "traefik.http.routers.triton-ws-dev.service=triton-backend-dev"
+      # Service commun aux deux routers
+      - "traefik.http.services.triton-backend-dev.loadbalancer.server.port=8000"
+
+  frontend:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm ci --prefer-offline && npm run dev"
+    volumes:
+      - ./frontend:/app
+      - triton_node_modules:/app/node_modules
+    environment:
+      - HMR_PORT=80
+    networks:
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.triton-frontend-dev.rule=Host(`triton.marvinlerouge.local`)"
+      - "traefik.http.routers.triton-frontend-dev.entrypoints=web"
+      - "traefik.http.services.triton-frontend-dev.loadbalancer.server.port=5173"
+
+volumes:
+  triton_node_modules:
+
+networks:
+  traefik-public:
+    external: true
+  internal:
+    driver: bridge

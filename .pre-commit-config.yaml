@@ -15,3 +15,24 @@ repos:
         types: [python]
         args: [engine, api]
         pass_filenames: false
+
+      - id: prettier-frontend
+        name: prettier (frontend)
+        entry: npm --prefix frontend run format
+        language: system
+        files: ^frontend/src/
+        pass_filenames: false
+
+      - id: eslint-frontend
+        name: eslint (frontend)
+        entry: npm --prefix frontend run lint
+        language: system
+        files: ^frontend/src/
+        pass_filenames: false
+
+      - id: vue-tsc-frontend
+        name: vue-tsc (frontend)
+        entry: npm --prefix frontend run type-check
+        language: system
+        files: ^frontend/src/
+        pass_filenames: false
