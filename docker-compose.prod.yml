@@ -1,0 +1,50 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    networks:
+      - traefik-public
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      # REST: /api/* → FastAPI (strip /api prefix)
+      - "traefik.http.routers.triton-api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.triton-api.entrypoints=websecure"
+      - "traefik.http.routers.triton-api.tls=true"
+      - "traefik.http.routers.triton-api.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.triton-strip-api.stripprefix.prefixes=/api"
+      - "traefik.http.routers.triton-api.middlewares=triton-strip-api"
+      - "traefik.http.routers.triton-api.service=triton-backend"
+      # WebSocket: /ws/* → FastAPI (pas de strip)
+      - "traefik.http.routers.triton-ws.rule=Host(`${DOMAIN}`) && PathPrefix(`/ws`)"
+      - "traefik.http.routers.triton-ws.entrypoints=websecure"
+      - "traefik.http.routers.triton-ws.tls=true"
+      - "traefik.http.routers.triton-ws.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.triton-ws.service=triton-backend"
+      # Service commun aux deux routers
+      - "traefik.http.services.triton-backend.loadbalancer.server.port=8000"
+
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks:
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.triton-frontend.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.triton-frontend.entrypoints=websecure"
+      - "traefik.http.routers.triton-frontend.tls=true"
+      - "traefik.http.routers.triton-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.triton-frontend.loadbalancer.server.port=80"
+
+networks:
+  traefik-public:
+    external: true
+  internal:
+    driver: bridge
