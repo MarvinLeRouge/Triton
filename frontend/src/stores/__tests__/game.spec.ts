@@ -4,62 +4,50 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useGameStore } from '../game'
 
 // ---------------------------------------------------------------------------
-// WebSocket mock — doit être une vraie classe (vi.fn() arrow n'est pas constructible)
+// WebSocket mock
+// WsMock is defined at module level so we can access WsMock.instance from
+// tests without aliasing `this` (which oxlint forbids).
 // ---------------------------------------------------------------------------
 
-type WsInstance = {
-  url: string
-  readyState: number
-  onopen: (() => void) | null
-  onclose: (() => void) | null
-  onmessage: ((event: { data: string }) => void) | null
-  sentMessages: string[]
-  send: (data: string) => void
-  close: () => void
-  simulateMessage: (payload: unknown) => void
-}
+class WsMock {
+  static instance: WsMock | null = null
+  static OPEN = 1
+  static CONNECTING = 0
+  static CLOSING = 2
+  static CLOSED = 3
 
-let mockWs: WsInstance
+  readyState = WsMock.CONNECTING
+  onopen: (() => void) | null = null
+  onclose: (() => void) | null = null
+  onmessage: ((event: { data: string }) => void) | null = null
+  sentMessages: string[] = []
+
+  constructor(public url: string) {
+    WsMock.instance = this
+    setTimeout(() => {
+      this.readyState = WsMock.OPEN
+      this.onopen?.()
+    }, 0)
+  }
+
+  send(data: string) {
+    this.sentMessages.push(data)
+  }
+
+  close() {
+    this.readyState = WsMock.CLOSED
+    this.onclose?.()
+  }
+
+  simulateMessage(payload: unknown) {
+    this.onmessage?.({ data: JSON.stringify(payload) })
+  }
+}
 
 beforeEach(() => {
   vi.useFakeTimers()
+  WsMock.instance = null
   setActivePinia(createPinia())
-
-  class WsMock {
-    static OPEN = 1
-    static CONNECTING = 0
-    static CLOSING = 2
-    static CLOSED = 3
-
-    readyState = WsMock.CONNECTING
-    onopen: (() => void) | null = null
-    onclose: (() => void) | null = null
-    onmessage: ((event: { data: string }) => void) | null = null
-    sentMessages: string[] = []
-
-    constructor(public url: string) {
-       
-      mockWs = this
-      setTimeout(() => {
-        this.readyState = WsMock.OPEN
-        this.onopen?.()
-      }, 0)
-    }
-
-    send(data: string) {
-      this.sentMessages.push(data)
-    }
-
-    close() {
-      this.readyState = WsMock.CLOSED
-      this.onclose?.()
-    }
-
-    simulateMessage(payload: unknown) {
-      this.onmessage?.({ data: JSON.stringify(payload) })
-    }
-  }
-
   vi.stubGlobal('WebSocket', WsMock)
 })
 
@@ -118,7 +106,7 @@ describe('connect()', () => {
     const store = useGameStore()
     store.connect('ws://localhost/ws/game')
     await vi.runAllTimersAsync()
-    mockWs.simulateMessage({ type: 'connected' })
+    WsMock.instance!.simulateMessage({ type: 'connected' })
     expect(store.lastMessage).toEqual({ type: 'connected' })
   })
 })
@@ -147,7 +135,7 @@ describe('sendPing()', () => {
     store.connect('ws://localhost/ws/game')
     await vi.runAllTimersAsync()
     store.sendPing()
-    expect(mockWs.sentMessages).toContain(JSON.stringify({ type: 'ping' }))
+    expect(WsMock.instance!.sentMessages).toContain(JSON.stringify({ type: 'ping' }))
   })
 
   it('does nothing when not connected', () => {
