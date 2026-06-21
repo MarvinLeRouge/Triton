@@ -14,6 +14,7 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
+    allowedHosts: true,
     hmr: {
       // En Docker derrière Traefik, le navigateur doit se connecter au port
       // de Traefik (80 en local, 443 en prod) plutôt qu'au port Vite (5173).
