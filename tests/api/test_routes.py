@@ -71,3 +71,17 @@ def test_result_is_valid_string(client: TestClient) -> None:
     with client.websocket_connect("/ws/game") as ws:
         data = ws.receive_json()
         assert data["result"] in valid
+
+
+def test_initial_state_has_detection_events_key(client: TestClient) -> None:
+    with client.websocket_connect("/ws/game") as ws:
+        data = ws.receive_json()
+        assert "detection_events" in data
+        assert isinstance(data["detection_events"], list)
+
+
+def test_drones_have_heading_field(client: TestClient) -> None:
+    with client.websocket_connect("/ws/game") as ws:
+        data = ws.receive_json()
+        assert all("heading" in d for d in data["drones"])
+        assert all(len(d["heading"]) == 2 for d in data["drones"])

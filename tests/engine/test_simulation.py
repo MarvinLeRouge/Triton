@@ -1,8 +1,11 @@
+import random
+
 import pytest
 
 from engine.entities import BlueDrone, BlueMothership, RedVessel
 from engine.grid import Grid
 from engine.simulation import GameResult, Simulation
+from engine.sonar_model import SonarModel
 
 
 def _make(
@@ -27,6 +30,8 @@ def _make(
         lock_turns=lock_turns,
         mothership_range=mothership_range,
         engagement_turns=engagement_turns,
+        rng=random.Random(42),
+        sonar=SonarModel(range_cells=0),  # same-cell only → mirrors Phase 1 behaviour
     )
     return sim, m, d, v
 
@@ -182,3 +187,31 @@ def test_turn_does_not_increment_after_red_wins() -> None:
     sim.advance()  # ne doit pas avancer
     assert sim.turn == 2
     assert sim.result is GameResult.RED_WINS
+
+
+# ---------------------------------------------------------------------------
+# detection_events
+# ---------------------------------------------------------------------------
+
+
+def test_detection_events_populated_when_drone_on_vessel() -> None:
+    sim, m, d, v = _make(d_pos=(1, 1), v_pos=(5, 5))
+    d.move(5, 5)  # same cell as vessel → certain detection (range_cells=0 degenerate case)
+    sim.advance()
+    state = sim.to_dict()
+    assert len(state["detection_events"]) == 1
+    assert state["detection_events"][0]["drone_idx"] == 0
+    assert state["detection_events"][0]["pod"] == 1.0
+
+
+def test_detection_events_empty_when_no_detection() -> None:
+    sim, *_ = _make()  # drone at (1,1), vessel at (9,9) → no detection
+    sim.advance()
+    assert sim.to_dict()["detection_events"] == []
+
+
+def test_to_dict_drones_include_heading() -> None:
+    sim, m, d, v = _make()
+    state = sim.to_dict()
+    assert "heading" in state["drones"][0]
+    assert state["drones"][0]["heading"] == [0, 1]  # default east
