@@ -137,6 +137,7 @@ class Simulation:
         elif self._turn >= self._max_turns:
             self._result = GameResult.RED_WINS
 
+        self._vessel_moved = False
         return self._result
 
     @property
