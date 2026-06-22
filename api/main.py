@@ -42,7 +42,13 @@ def _new_game() -> Simulation:
             v_row, v_col = grid.rows - 1 - dist, rng.randint(0, grid.cols - 1)
     vessel = RedVessel(grid=grid, row=v_row, col=v_col)
 
-    return Simulation(grid=grid, mothership=ms, drones=drones, red_vessel=vessel)
+    return Simulation(
+        grid=grid,
+        mothership=ms,
+        drones=drones,
+        red_vessel=vessel,
+        rng=random.Random(),
+    )
 
 
 def _random_move(
@@ -72,7 +78,9 @@ async def ws_game(websocket: WebSocket) -> None:
             await asyncio.sleep(STEP_INTERVAL)
             for drone in sim.drones:
                 _random_move(drone, sim.grid, rng, max_delta=2)
+            prev_row, prev_col = sim.vessel.row, sim.vessel.col
             _random_move(sim.vessel, sim.grid, rng, max_delta=1)
+            sim.notify_vessel_moved((sim.vessel.row, sim.vessel.col) != (prev_row, prev_col))
             sim.advance()
             await websocket.send_json(sim.to_dict())
     except WebSocketDisconnect:

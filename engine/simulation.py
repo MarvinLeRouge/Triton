@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import random
 from enum import StrEnum
 from typing import Any
 
 from engine.entities import BlueDrone, BlueMothership, RedVessel
 from engine.grid import Grid
+from engine.sonar_model import SonarModel
 
 
 class GameResult(StrEnum):
@@ -14,7 +16,7 @@ class GameResult(StrEnum):
 
 
 class Simulation:
-    """Turn-based simulation skeleton.
+    """Turn-based simulation rule engine.
 
     Entities are moved externally between turns; advance() evaluates the
     resulting board state and updates win-condition counters.
@@ -22,14 +24,14 @@ class Simulation:
     Win conditions
     --------------
     Blue wins when both streaks reach their thresholds simultaneously:
-      - detection_streak  >= lock_turns       (drone tracks RedVessel)
+      - detection_streak  >= lock_turns
       - engagement_streak >= engagement_turns  (RedVessel also in Mothership range)
     Red wins when max_turns is reached without Blue winning.
 
-    Detection (Phase 1 placeholder)
-    --------------------------------
-    A drone detects the RedVessel when they share the same cell.
-    Phase 2 will replace this with a sonar-cone probability model.
+    Detection
+    ---------
+    SonarModel evaluates a probabilistic cone-shaped detection law each turn.
+    Call notify_vessel_moved() before advance() to feed the speed signal.
 
     Range metric
     ------------
@@ -46,6 +48,8 @@ class Simulation:
         lock_turns: int = 3,
         mothership_range: int = 5,
         engagement_turns: int = 2,
+        rng: random.Random | None = None,
+        sonar: SonarModel | None = None,
     ) -> None:
         positions = (
             [(mothership.row, mothership.col)]
@@ -63,20 +67,34 @@ class Simulation:
         self._lock_turns = lock_turns
         self._mothership_range = mothership_range
         self._engagement_turns = engagement_turns
+        self._rng = rng if rng is not None else random.Random()
+        self._sonar = sonar if sonar is not None else SonarModel()
 
         self._turn: int = 0
         self._detection_streak: int = 0
         self._engagement_streak: int = 0
         self._result: GameResult = GameResult.IN_PROGRESS
+        self._vessel_moved: bool = False
+        self._last_detection_events: list[dict[str, Any]] = []
 
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
 
-    def _detects_any(self) -> bool:
-        return any(
-            d.row == self._red_vessel.row and d.col == self._red_vessel.col for d in self._drones
-        )
+    def _compute_detections(self) -> list[dict[str, Any]]:
+        events: list[dict[str, Any]] = []
+        for i, drone in enumerate(self._drones):
+            detected, pod = self._sonar.try_detect(
+                drone=(drone.row, drone.col),
+                heading=drone.heading,
+                target=(self._red_vessel.row, self._red_vessel.col),
+                vessel_moved=self._vessel_moved,
+                detection_streak=self._detection_streak,
+                rng=self._rng,
+            )
+            if detected:
+                events.append({"drone_idx": i, "pod": round(pod, 3)})
+        return events
 
     def _in_mothership_range(self) -> bool:
         dr = abs(self._mothership.row - self._red_vessel.row)
@@ -87,18 +105,18 @@ class Simulation:
     # Public API
     # ------------------------------------------------------------------
 
-    def advance(self) -> GameResult:
-        """Evaluate the current board state and advance one turn.
+    def notify_vessel_moved(self, moved: bool) -> None:
+        """Signal whether RedVessel moved this turn, before calling advance()."""
+        self._vessel_moved = moved
 
-        Must be called after all entity moves for the turn have been applied.
-        Returns the current GameResult; repeated calls after game-over are no-ops.
-        """
+    def advance(self) -> GameResult:
+        """Evaluate the current board state and advance one turn."""
         if self._result is not GameResult.IN_PROGRESS:
             return self._result
 
         self._turn += 1
-
-        detected = self._detects_any()
+        self._last_detection_events = self._compute_detections()
+        detected = len(self._last_detection_events) > 0
         in_range = self._in_mothership_range()
 
         if detected:
@@ -119,6 +137,7 @@ class Simulation:
         elif self._turn >= self._max_turns:
             self._result = GameResult.RED_WINS
 
+        self._vessel_moved = False
         return self._result
 
     @property
@@ -151,6 +170,9 @@ class Simulation:
             "turn": self._turn,
             "result": self._result.value,
             "mothership": {"row": self._mothership.row, "col": self._mothership.col},
-            "drones": [{"row": d.row, "col": d.col} for d in self._drones],
+            "drones": [
+                {"row": d.row, "col": d.col, "heading": list(d.heading)} for d in self._drones
+            ],
             "vessel": {"row": self._red_vessel.row, "col": self._red_vessel.col},
+            "detection_events": self._last_detection_events,
         }
