@@ -8,12 +8,24 @@ export interface Position {
   col: number
 }
 
+export interface DroneState {
+  row: number
+  col: number
+  heading: [number, number]
+}
+
+export interface DetectionEvent {
+  drone_idx: number
+  pod: number
+}
+
 export interface GameState {
   turn: number
   result: 'in_progress' | 'blue_wins' | 'red_wins'
   mothership: Position
-  drones: Position[]
+  drones: DroneState[]
   vessel: Position
+  detection_events: DetectionEvent[]
 }
 
 function buildWsUrl(): string {

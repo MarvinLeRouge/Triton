@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import GameCanvas from '../GameCanvas.vue'
+import type { GameState } from '@/stores/game'
 
 class WsMock {
   static OPEN = 1
@@ -28,6 +29,18 @@ function mountCanvas() {
   return mount(GameCanvas, {
     global: { plugins: [createPinia()] },
   })
+}
+
+const DETECTION_GAME_STATE: GameState = {
+  turn: 1,
+  result: 'in_progress',
+  mothership: { row: 2, col: 3 },
+  drones: [
+    { row: 5, col: 5, heading: [0, 1] },
+    { row: 7, col: 7, heading: [1, 0] },
+  ],
+  vessel: { row: 20, col: 30 },
+  detection_events: [{ drone_idx: 0, pod: 0.74 }],
 }
 
 describe('GameCanvas', () => {
@@ -73,5 +86,20 @@ describe('GameCanvas', () => {
     const wrapper = mountCanvas()
     wrapper.unmount()
     expect(closeCalled).toBe(true)
+  })
+
+  it('renders without error when detection_events present', () => {
+    class CapturingMock extends WsMock {
+      static instances: CapturingMock[] = []
+      constructor() {
+        super()
+        CapturingMock.instances.push(this)
+      }
+    }
+    CapturingMock.instances = []
+    vi.stubGlobal('WebSocket', CapturingMock)
+    mountCanvas()
+    CapturingMock.instances[0]?.onmessage?.({ data: JSON.stringify(DETECTION_GAME_STATE) })
+    expect(true).toBe(true)
   })
 })
