@@ -21,6 +21,54 @@ Triton (Tracking & Reconnaissance In Tactical Operations Network) est une simula
 - **Frontend** — Vue 3 + Vite + Canvas API
 - **Infra** — Docker + Traefik
 
+## Développement local
+
+### Prérequis
+
+- [uv](https://docs.astral.sh/uv/) — gestionnaire de paquets Python
+- Node.js ≥ 22
+- Docker avec Compose v2 (`docker compose`)
+
+### Backend
+
+```bash
+uv sync
+uv run pytest              # tests
+uv run ruff check .        # lint
+uv run mypy engine api     # vérification de types
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev                # serveur de dev sur http://localhost:5173
+npm run test:unit          # tests unitaires
+npm run lint               # ESLint + oxlint
+npm run type-check         # TypeScript
+```
+
+### Stack complète via Docker + Traefik (recommandé)
+
+Suivre `docs/ai/dev-local-traefik.md` pour le setup Traefik local (one-time), puis :
+
+```bash
+# Ajouter dans /etc/hosts : 127.0.0.1 triton.marvinlerouge.local
+docker compose up
+# Ouvrir http://triton.marvinlerouge.local
+```
+
+Pour développer sans Docker, le frontend doit atteindre le backend.
+Définir `VITE_WS_URL=ws://localhost:8000/ws/game` dans `frontend/.env`
+et lancer le backend séparément :
+
+```bash
+uv run uvicorn api.main:app --reload
+```
+
+---
+
 ## 🗺️ Feuille de route
 
 ### ✅ Planification
@@ -29,7 +77,7 @@ Triton (Tracking & Reconnaissance In Tactical Operations Network) est une simula
 
 ### 🔜 Prévu
 
-- [ ] **Phase 1 — Fondations** : grille, entités, placement initial, pipeline complet (engine, API, frontend, Docker/Traefik)
+- [x] **Phase 1 — Fondations** : grille, entités, placement initial, pipeline complet (engine, API, frontend, Docker/Traefik)
 - [ ] **Phase 2 — Modèle sonar** : cône de détection (POD), probabilité de détection
 - [ ] **Phase 3 — Carte bayésienne** : carte de probabilité, mise à jour bayésienne, diffusion temporelle
 - [ ] **Phase 4 — Intelligence des drones** : stratégies de recherche, machine à états de détection

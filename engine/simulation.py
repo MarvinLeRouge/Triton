@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-from enum import Enum, auto
+from enum import StrEnum
+from typing import Any
 
 from engine.entities import BlueDrone, BlueMothership, RedVessel
 from engine.grid import Grid
 
 
-class GameResult(Enum):
-    IN_PROGRESS = auto()
-    BLUE_WINS = auto()
-    RED_WINS = auto()
+class GameResult(StrEnum):
+    IN_PROGRESS = "in_progress"
+    BLUE_WINS = "blue_wins"
+    RED_WINS = "red_wins"
 
 
 class Simulation:
@@ -127,3 +128,29 @@ class Simulation:
     @property
     def result(self) -> GameResult:
         return self._result
+
+    @property
+    def grid(self) -> Grid:
+        return self._grid
+
+    @property
+    def mothership(self) -> BlueMothership:
+        return self._mothership
+
+    @property
+    def drones(self) -> list[BlueDrone]:
+        return self._drones
+
+    @property
+    def vessel(self) -> RedVessel:
+        return self._red_vessel
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize the current game state to a JSON-compatible dict."""
+        return {
+            "turn": self._turn,
+            "result": self._result.value,
+            "mothership": {"row": self._mothership.row, "col": self._mothership.col},
+            "drones": [{"row": d.row, "col": d.col} for d in self._drones],
+            "vessel": {"row": self._red_vessel.row, "col": self._red_vessel.col},
+        }
