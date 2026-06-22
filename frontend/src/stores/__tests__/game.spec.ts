@@ -2,11 +2,10 @@ import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useGameStore } from '../game'
+import type { GameState } from '../game'
 
 // ---------------------------------------------------------------------------
 // WebSocket mock
-// WsMock is defined at module level so we can access WsMock.instance from
-// tests without aliasing `this` (which oxlint forbids).
 // ---------------------------------------------------------------------------
 
 class WsMock {
@@ -20,7 +19,6 @@ class WsMock {
   onopen: (() => void) | null = null
   onclose: (() => void) | null = null
   onmessage: ((event: { data: string }) => void) | null = null
-  sentMessages: string[] = []
 
   constructor(public url: string) {
     WsMock.instance = this
@@ -28,10 +26,6 @@ class WsMock {
       this.readyState = WsMock.OPEN
       this.onopen?.()
     }, 0)
-  }
-
-  send(data: string) {
-    this.sentMessages.push(data)
   }
 
   close() {
@@ -42,6 +36,17 @@ class WsMock {
   simulateMessage(payload: unknown) {
     this.onmessage?.({ data: JSON.stringify(payload) })
   }
+}
+
+const SAMPLE_STATE: GameState = {
+  turn: 1,
+  result: 'in_progress',
+  mothership: { row: 5, col: 3 },
+  drones: [
+    { row: 4, col: 3 },
+    { row: 6, col: 4 },
+  ],
+  vessel: { row: 10, col: 40 },
 }
 
 beforeEach(() => {
@@ -66,9 +71,9 @@ describe('initial state', () => {
     expect(store.status).toBe('idle')
   })
 
-  it('lastMessage is null', () => {
+  it('gameState is null', () => {
     const store = useGameStore()
-    expect(store.lastMessage).toBeNull()
+    expect(store.gameState).toBeNull()
   })
 
   it('isConnected is false', () => {
@@ -102,12 +107,23 @@ describe('connect()', () => {
     expect(store.isConnected).toBe(true)
   })
 
-  it('stores incoming message in lastMessage', async () => {
+  it('updates gameState on incoming message', async () => {
     const store = useGameStore()
     store.connect('ws://localhost/ws/game')
     await vi.runAllTimersAsync()
-    WsMock.instance!.simulateMessage({ type: 'connected' })
-    expect(store.lastMessage).toEqual({ type: 'connected' })
+    WsMock.instance!.simulateMessage(SAMPLE_STATE)
+    expect(store.gameState?.turn).toBe(1)
+    expect(store.gameState?.mothership).toEqual({ row: 5, col: 3 })
+    expect(store.gameState?.drones).toHaveLength(2)
+  })
+
+  it('gameState reflects latest message', async () => {
+    const store = useGameStore()
+    store.connect('ws://localhost/ws/game')
+    await vi.runAllTimersAsync()
+    WsMock.instance!.simulateMessage(SAMPLE_STATE)
+    WsMock.instance!.simulateMessage({ ...SAMPLE_STATE, turn: 2 })
+    expect(store.gameState?.turn).toBe(2)
   })
 })
 
@@ -123,23 +139,13 @@ describe('disconnect()', () => {
     store.disconnect()
     expect(store.status).toBe('disconnected')
   })
-})
 
-// ---------------------------------------------------------------------------
-// sendPing()
-// ---------------------------------------------------------------------------
-
-describe('sendPing()', () => {
-  it('sends a ping message when connected', async () => {
+  it('clears gameState on disconnect', async () => {
     const store = useGameStore()
     store.connect('ws://localhost/ws/game')
     await vi.runAllTimersAsync()
-    store.sendPing()
-    expect(WsMock.instance!.sentMessages).toContain(JSON.stringify({ type: 'ping' }))
-  })
-
-  it('does nothing when not connected', () => {
-    const store = useGameStore()
-    expect(() => store.sendPing()).not.toThrow()
+    WsMock.instance!.simulateMessage(SAMPLE_STATE)
+    store.disconnect()
+    expect(store.gameState).toBeNull()
   })
 })
