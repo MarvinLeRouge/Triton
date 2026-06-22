@@ -78,7 +78,7 @@ uv run uvicorn api.main:app --reload
 ### 🔜 Planned
 
 - [x] **Phase 1 — Foundations**: grid, entities, initial placement, end-to-end pipeline (engine, API, frontend, Docker/Traefik)
-- [ ] **Phase 2 — Sonar model**: cone-shaped POD, detection probability
+- [x] **Phase 2 — Sonar model**: cone-shaped POD, detection probability
 - [ ] **Phase 3 — Bayesian map**: probability map, Bayesian update, temporal diffusion
 - [ ] **Phase 4 — Drone intelligence**: search strategies, detection state machine
 - [ ] **Phase 5 — Red behavior**: evasion, infiltration objective
