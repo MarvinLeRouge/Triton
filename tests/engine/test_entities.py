@@ -113,3 +113,43 @@ def test_red_vessel_move_out_of_bounds_raises() -> None:
     v = RedVessel(grid=g, row=5, col=5)
     with pytest.raises(ValueError):
         v.move(5, -1)
+
+
+# ---------------------------------------------------------------------------
+# BlueDrone — heading
+# ---------------------------------------------------------------------------
+
+
+def test_drone_default_heading_is_east() -> None:
+    g = Grid()
+    d = BlueDrone(grid=g, row=5, col=5)
+    assert d.heading == (0, 1)
+
+
+def test_drone_heading_updates_on_move_south() -> None:
+    g = Grid()
+    d = BlueDrone(grid=g, row=5, col=5)
+    d.move(6, 5)
+    assert d.heading == (1, 0)
+
+
+def test_drone_heading_updates_on_move_northeast() -> None:
+    g = Grid()
+    d = BlueDrone(grid=g, row=5, col=5)
+    d.move(4, 6)
+    assert d.heading == (-1, 1)
+
+
+def test_drone_heading_preserved_when_stationary() -> None:
+    g = Grid()
+    d = BlueDrone(grid=g, row=5, col=5)
+    d.move(6, 5)  # heading now (1, 0)
+    d.move(6, 5)  # no movement → heading unchanged
+    assert d.heading == (1, 0)
+
+
+def test_drone_heading_updates_on_diagonal_move() -> None:
+    g = Grid()
+    d = BlueDrone(grid=g, row=5, col=5)
+    d.move(6, 6)
+    assert d.heading == (1, 1)

@@ -52,9 +52,24 @@ class BlueMothership(Entity):
 class BlueDrone(Entity):
     """Mobile sonar drone deployed by the BlueMothership."""
 
+    def __init__(self, grid: Grid, row: int, col: int) -> None:
+        super().__init__(grid, row, col)
+        self._heading: tuple[int, int] = (0, 1)  # default: east, toward Red territory
+
     @property
     def faction(self) -> Faction:
         return Faction.BLUE
+
+    @property
+    def heading(self) -> tuple[int, int]:
+        return self._heading
+
+    def move(self, row: int, col: int) -> None:
+        drow = row - self._row
+        dcol = col - self._col
+        if drow != 0 or dcol != 0:
+            self._heading = (drow, dcol)
+        super().move(row, col)
 
 
 class RedVessel(Entity):

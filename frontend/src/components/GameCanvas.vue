@@ -8,7 +8,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 
-import { cellToPixelX, cellToPixelY } from './canvas-helpers'
+import { cellToPixelX, cellToPixelY, drawCone } from './canvas-helpers'
 import { useGameStore } from '@/stores/game'
 
 const CELL_SIZE = 10
@@ -16,9 +16,12 @@ const GRID_ROWS = 50
 const GRID_COLS = 50
 const CANVAS_W = GRID_COLS * CELL_SIZE
 const CANVAS_H = GRID_ROWS * CELL_SIZE
+const CONE_HALF_ANGLE = 60
+const CONE_RANGE_PX = 8 * CELL_SIZE
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const store = useGameStore()
+const flashingDrones = ref(new Set<number>())
 
 function drawGrid(ctx: CanvasRenderingContext2D): void {
   ctx.strokeStyle = '#dde'
@@ -43,11 +46,30 @@ function render(): void {
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
-  const { mothership, drones, vessel } = store.gameState
+  const { mothership, drones, vessel, detection_events } = store.gameState
   const half = CELL_SIZE / 2
+
+  flashingDrones.value = new Set(detection_events.map((e) => e.drone_idx))
 
   ctx.clearRect(0, 0, CANVAS_W, CANVAS_H)
   drawGrid(ctx)
+
+  // Cones — rendered behind entities
+  for (let i = 0; i < drones.length; i++) {
+    const drone = drones[i]
+    if (!drone) continue
+    const color = flashingDrones.value.has(i) ? 'rgba(255, 140, 0, 0.4)' : 'rgba(0, 68, 204, 0.15)'
+    drawCone(
+      ctx,
+      cellToPixelX(drone.col, CELL_SIZE) + half,
+      cellToPixelY(drone.row, CELL_SIZE) + half,
+      drone.heading[0],
+      drone.heading[1],
+      CONE_HALF_ANGLE,
+      CONE_RANGE_PX,
+      color,
+    )
+  }
 
   // BlueMothership — filled square (dark blue)
   ctx.fillStyle = '#0044cc'
