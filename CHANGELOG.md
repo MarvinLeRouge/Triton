@@ -10,6 +10,27 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [0.2.0] — 2026-06-22 — Phase 2: Sonar Model
+
+### Added
+
+**Engine**
+- `SonarModel` — modèle de détection probabiliste : cône directionnel 120°/8 cases, loi POD exponentielle `exp(-λr) · noise(v) · attention(streak)`, tirage par tour
+- `BlueDrone.heading` — cap du drone, mis à jour à chaque `move()`, défaut est (0,1)
+- `Simulation.notify_vessel_moved()` — signal de vitesse de Red pour le prochain tour
+- `Simulation._compute_detections()` — remplace le placeholder de partage de case par un tirage POD sonar
+- `Simulation.to_dict()` — enrichi avec `drones[].heading` et `detection_events`
+
+**API**
+- `WebSocket /ws/game` — inclut désormais `detection_events` et `heading` par drone dans chaque frame
+
+**Frontend**
+- `DroneState` / `DetectionEvent` — types TypeScript pour le nouvel état de jeu
+- `drawCone()` — helper canvas pur : secteur arc orienté selon le cap du drone
+- `GameCanvas` — cônes sonar rendus derrière les entités, flash orange 1 tour sur détection
+
+---
+
 ## [0.1.0] — 2026-06-21 — Phase 1: Foundations
 
 ### Added
