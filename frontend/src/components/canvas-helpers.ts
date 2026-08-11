@@ -23,6 +23,50 @@ export function drawHeatmapCell(
   ctx.fillRect(x, y, size, size)
 }
 
+const DETECTION_STATE_COLORS: Record<string, string> = {
+  signaling: '#ffd700',
+  confirming: '#ff8c00',
+  tracking: '#ff0000',
+}
+
+export function detectionStateColor(state: string): string {
+  return DETECTION_STATE_COLORS[state] ?? 'transparent'
+}
+
+export function strategyLabel(strategy: string): string {
+  return strategy
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase())
+    .join('')
+}
+
+export function drawDetectionRing(
+  ctx: CanvasRenderingContext2D,
+  centerX: number,
+  centerY: number,
+  radius: number,
+  color: string,
+): void {
+  if (color === 'transparent') return
+  ctx.beginPath()
+  ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI)
+  ctx.strokeStyle = color
+  ctx.lineWidth = 1.5
+  ctx.stroke()
+}
+
+export function drawStrategyLabel(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  label: string,
+): void {
+  ctx.fillStyle = '#000'
+  ctx.font = '8px sans-serif'
+  ctx.textAlign = 'center'
+  ctx.fillText(label, x, y)
+}
+
 export function drawCone(
   ctx: CanvasRenderingContext2D,
   originX: number,

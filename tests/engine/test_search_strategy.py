@@ -10,6 +10,19 @@ def _pm(grid: Grid) -> ProbabilityMap:
 
 
 # ---------------------------------------------------------------------------
+# name
+# ---------------------------------------------------------------------------
+
+
+def test_greedy_name() -> None:
+    assert GreedyMaxProbability().name == "greedy_max_probability"
+
+
+def test_frontier_name() -> None:
+    assert FrontierCoverage().name == "frontier_coverage"
+
+
+# ---------------------------------------------------------------------------
 # GreedyMaxProbability
 # ---------------------------------------------------------------------------
 

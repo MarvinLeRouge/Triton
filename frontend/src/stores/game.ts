@@ -8,10 +8,14 @@ export interface Position {
   col: number
 }
 
+export type DetectionState = 'searching' | 'signaling' | 'confirming' | 'tracking'
+
 export interface DroneState {
   row: number
   col: number
   heading: [number, number]
+  detection_state: DetectionState
+  strategy: string
 }
 
 export interface DetectionEvent {

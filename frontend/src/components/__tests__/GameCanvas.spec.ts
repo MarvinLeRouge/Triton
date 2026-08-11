@@ -36,8 +36,14 @@ const DETECTION_GAME_STATE: GameState = {
   result: 'in_progress',
   mothership: { row: 2, col: 3 },
   drones: [
-    { row: 5, col: 5, heading: [0, 1] },
-    { row: 7, col: 7, heading: [1, 0] },
+    {
+      row: 5,
+      col: 5,
+      heading: [0, 1],
+      detection_state: 'searching',
+      strategy: 'greedy_max_probability',
+    },
+    { row: 7, col: 7, heading: [1, 0], detection_state: 'tracking', strategy: 'frontier_coverage' },
   ],
   vessel: { row: 20, col: 30 },
   detection_events: [{ drone_idx: 0, pod: 0.74 }],

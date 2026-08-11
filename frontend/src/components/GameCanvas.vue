@@ -11,9 +11,13 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 import {
   cellToPixelX,
   cellToPixelY,
+  detectionStateColor,
   drawCone,
+  drawDetectionRing,
   drawHeatmapCell,
+  drawStrategyLabel,
   heatmapIntensity,
+  strategyLabel,
 } from './canvas-helpers'
 import { useGameStore } from '@/stores/game'
 
@@ -110,18 +114,18 @@ function render(): void {
     CELL_SIZE - 2,
   )
 
-  // BlueDrone — circle (light blue)
-  ctx.fillStyle = '#4488ff'
+  // BlueDrone — circle (light blue), detection-state ring, strategy label
   for (const drone of drones) {
+    const cx = cellToPixelX(drone.col, CELL_SIZE) + half
+    const cy = cellToPixelY(drone.row, CELL_SIZE) + half
+
+    ctx.fillStyle = '#4488ff'
     ctx.beginPath()
-    ctx.arc(
-      cellToPixelX(drone.col, CELL_SIZE) + half,
-      cellToPixelY(drone.row, CELL_SIZE) + half,
-      half - 1,
-      0,
-      2 * Math.PI,
-    )
+    ctx.arc(cx, cy, half - 1, 0, 2 * Math.PI)
     ctx.fill()
+
+    drawDetectionRing(ctx, cx, cy, half + 1, detectionStateColor(drone.detection_state))
+    drawStrategyLabel(ctx, cx, cy - half - 2, strategyLabel(drone.strategy))
   }
 
   // RedVessel — triangle (red)
