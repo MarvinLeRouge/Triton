@@ -1,5 +1,10 @@
 from engine.grid import Grid
-from engine.red_behavior import InfiltrationZone, infiltration_zone_for, red_baseline_target
+from engine.red_behavior import (
+    InfiltrationZone,
+    infiltration_zone_for,
+    red_baseline_target,
+    red_evasion_target,
+)
 
 # ---------------------------------------------------------------------------
 # infiltration_zone_for
@@ -100,4 +105,39 @@ def test_respects_grid_bounds() -> None:
     grid = Grid(rows=10, cols=10)
     zone = InfiltrationZone(row_min=0, row_max=6, col_min=0, col_max=10)
     target = red_baseline_target(position=(0, 0), zone=zone, speed=1, grid=grid)
+    assert grid.in_bounds(*target)
+
+
+# ---------------------------------------------------------------------------
+# red_evasion_target
+# ---------------------------------------------------------------------------
+
+
+def test_flees_west_when_threat_is_east() -> None:
+    grid = Grid(rows=50, cols=50)
+    target = red_evasion_target(position=(20, 20), threats=[(20, 25)], speed=1, grid=grid)
+    assert target == (20, 19)
+
+
+def test_flees_diagonally_when_threat_is_diagonal() -> None:
+    grid = Grid(rows=50, cols=50)
+    target = red_evasion_target(position=(20, 20), threats=[(23, 23)], speed=1, grid=grid)
+    assert target == (19, 19)
+
+
+def test_flees_from_nearest_threat_among_several() -> None:
+    grid = Grid(rows=50, cols=50)
+    target = red_evasion_target(position=(20, 20), threats=[(20, 30), (20, 22)], speed=1, grid=grid)
+    assert target == (20, 19)  # flees the closer threat at (20, 22), east → moves west
+
+
+def test_respects_speed() -> None:
+    grid = Grid(rows=50, cols=50)
+    target = red_evasion_target(position=(20, 20), threats=[(20, 25)], speed=3, grid=grid)
+    assert target == (20, 17)
+
+
+def test_evasion_respects_grid_bounds() -> None:
+    grid = Grid(rows=10, cols=10)
+    target = red_evasion_target(position=(0, 0), threats=[(1, 1)], speed=1, grid=grid)
     assert grid.in_bounds(*target)
