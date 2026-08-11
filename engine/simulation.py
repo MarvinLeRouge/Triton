@@ -7,6 +7,7 @@ from typing import Any
 from engine.entities import BlueDrone, BlueMothership, RedVessel
 from engine.grid import Grid
 from engine.probability_map import ProbabilityMap
+from engine.red_behavior import infiltration_zone_for, red_baseline_target
 from engine.search_strategy import FrontierCoverage, GreedyMaxProbability
 from engine.sonar_model import SonarModel
 from engine.strategy_assignment import StrategyAssignment
@@ -23,15 +24,17 @@ class Simulation:
 
     Entities are moved externally between turns; advance() evaluates the
     resulting board state and updates win-condition counters. Drones move
-    via move_drones() (per their assigned SearchStrategy); RedVessel is
-    still moved by the caller. Both are called before advance().
+    via move_drones() (per their assigned SearchStrategy); RedVessel moves
+    via move_vessel() (baseline: steps toward the infiltration zone). Both
+    are called before advance().
 
     Win conditions
     --------------
     Blue wins when both streaks reach their thresholds simultaneously:
       - detection_streak  >= lock_turns
       - engagement_streak >= engagement_turns  (RedVessel also in Mothership range)
-    Red wins when max_turns is reached without Blue winning.
+    Red wins by infiltration (RedVessel reaches the zone behind Mothership's
+    spawn) or when max_turns is reached without Blue winning.
 
     Detection
     ---------
@@ -58,6 +61,7 @@ class Simulation:
         probability_map: ProbabilityMap | None = None,
         strategy_assignment: StrategyAssignment | None = None,
         drone_speed: int = 2,
+        vessel_speed: int = 1,
     ) -> None:
         positions = (
             [(mothership.row, mothership.col)]
@@ -90,6 +94,8 @@ class Simulation:
                 rng=self._rng,
             )
         )
+        self._vessel_speed = vessel_speed
+        self._infiltration_zone = infiltration_zone_for(mothership.row, grid)
 
         self._turn: int = 0
         self._detection_streak: int = 0
@@ -168,6 +174,22 @@ class Simulation:
             claimed.add(target)
             drone.move(*target)
 
+    def move_vessel(self) -> None:
+        """Move RedVessel one step toward the infiltration zone (baseline behavior).
+
+        Called externally before advance(), matching move_drones()'s pattern.
+        """
+        if self._result is not GameResult.IN_PROGRESS:
+            return
+
+        target = red_baseline_target(
+            position=(self._red_vessel.row, self._red_vessel.col),
+            zone=self._infiltration_zone,
+            speed=self._vessel_speed,
+            grid=self._grid,
+        )
+        self._red_vessel.move(*target)
+
     def advance(self) -> GameResult:
         """Evaluate the current board state and advance one turn."""
         if self._result is not GameResult.IN_PROGRESS:
@@ -194,6 +216,8 @@ class Simulation:
             and self._engagement_streak >= self._engagement_turns
         ):
             self._result = GameResult.BLUE_WINS
+        elif self._infiltration_zone.contains(self._red_vessel.row, self._red_vessel.col):
+            self._result = GameResult.RED_WINS
         elif self._turn >= self._max_turns:
             self._result = GameResult.RED_WINS
 
