@@ -15,19 +15,19 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 
 **Engine**
-- `SonarModel` — modèle de détection probabiliste : cône directionnel 120°/8 cases, loi POD exponentielle `exp(-λr) · noise(v) · attention(streak)`, tirage par tour
-- `BlueDrone.heading` — cap du drone, mis à jour à chaque `move()`, défaut est (0,1)
-- `Simulation.notify_vessel_moved()` — signal de vitesse de Red pour le prochain tour
-- `Simulation._compute_detections()` — remplace le placeholder de partage de case par un tirage POD sonar
-- `Simulation.to_dict()` — enrichi avec `drones[].heading` et `detection_events`
+- `SonarModel` — probabilistic detection model: directional cone (120°, 8-cell range), exponential POD law `exp(-λr) · noise(v) · attention(streak)`, probabilistic draw each turn
+- `BlueDrone.heading` — drone heading, updated on each `move()`, default `(0, 1)` (east)
+- `Simulation.notify_vessel_moved()` — Red speed signal for the next turn
+- `Simulation._compute_detections()` — replaces same-cell placeholder with a sonar POD draw
+- `Simulation.to_dict()` — extended with `drones[].heading` and `detection_events`
 
 **API**
-- `WebSocket /ws/game` — inclut désormais `detection_events` et `heading` par drone dans chaque frame
+- `WebSocket /ws/game` — now includes `detection_events` and per-drone `heading` in each frame
 
 **Frontend**
-- `DroneState` / `DetectionEvent` — types TypeScript pour le nouvel état de jeu
-- `drawCone()` — helper canvas pur : secteur arc orienté selon le cap du drone
-- `GameCanvas` — cônes sonar rendus derrière les entités, flash orange 1 tour sur détection
+- `DroneState` / `DetectionEvent` — TypeScript types for the updated game state
+- `drawCone()` — pure canvas helper: arc sector oriented along the drone heading
+- `GameCanvas` — sonar cones rendered behind entities, orange flash for 1 turn on detection
 
 ---
 
