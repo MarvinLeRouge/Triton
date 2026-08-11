@@ -26,6 +26,12 @@ def _chebyshev(a: tuple[int, int], b: tuple[int, int]) -> int:
 class SearchStrategy(ABC):
     """Decides a BlueDrone's next target cell for one turn."""
 
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """Stable lowercase identifier, exposed to the API/frontend."""
+        ...
+
     @abstractmethod
     def next_target(
         self,
@@ -44,6 +50,10 @@ class GreedyMaxProbability(SearchStrategy):
     Ties broken by proximity to the current position (least movement), then
     by (row, col) for full determinism.
     """
+
+    @property
+    def name(self) -> str:
+        return "greedy_max_probability"
 
     def next_target(
         self,
@@ -71,6 +81,10 @@ class FrontierCoverage(SearchStrategy):
     Falls back to the highest-probability reachable cell when none clears
     the mean.
     """
+
+    @property
+    def name(self) -> str:
+        return "frontier_coverage"
 
     def next_target(
         self,

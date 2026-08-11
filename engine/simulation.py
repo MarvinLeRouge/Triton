@@ -240,8 +240,9 @@ class Simulation:
                     "col": d.col,
                     "heading": list(d.heading),
                     "detection_state": d.detection_state.value,
+                    "strategy": self._strategy_assignment.strategy_for(i).name,
                 }
-                for d in self._drones
+                for i, d in enumerate(self._drones)
             ],
             "vessel": {"row": self._red_vessel.row, "col": self._red_vessel.col},
             "detection_events": self._last_detection_events,

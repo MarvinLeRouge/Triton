@@ -189,6 +189,17 @@ def test_to_dict_includes_drone_detection_state() -> None:
     assert state["drones"][0]["detection_state"] == "signaling"
 
 
+def test_to_dict_includes_drone_strategy_name() -> None:
+    assignment = StrategyAssignment(
+        strategies=[GreedyMaxProbability()], drone_count=1, switch_probability=0.0
+    )
+    sim, d, v = _make(d_pos=(1, 1), v_pos=(9, 9), strategy_assignment=assignment)
+
+    state = sim.to_dict()
+
+    assert state["drones"][0]["strategy"] == "greedy_max_probability"
+
+
 def test_global_win_condition_streak_unaffected_by_per_drone_detection_state() -> None:
     sim, d, v = _make(m_pos=(0, 0), d_pos=(0, 4), v_pos=(9, 9))
     v.move(0, 4)  # same cell as drone → guaranteed detection
