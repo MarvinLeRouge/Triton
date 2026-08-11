@@ -7,7 +7,7 @@ from typing import Any
 from engine.entities import BlueDrone, BlueMothership, RedVessel
 from engine.grid import Grid
 from engine.probability_map import ProbabilityMap
-from engine.red_behavior import infiltration_zone_for, red_baseline_target
+from engine.red_behavior import infiltration_zone_for, red_baseline_target, red_evasion_target
 from engine.search_strategy import FrontierCoverage, GreedyMaxProbability
 from engine.sonar_model import SonarModel
 from engine.strategy_assignment import StrategyAssignment
@@ -25,8 +25,9 @@ class Simulation:
     Entities are moved externally between turns; advance() evaluates the
     resulting board state and updates win-condition counters. Drones move
     via move_drones() (per their assigned SearchStrategy); RedVessel moves
-    via move_vessel() (baseline: steps toward the infiltration zone). Both
-    are called before advance().
+    via move_vessel() — baseline: steps toward the infiltration zone, or
+    evasion: flees the nearest drone that detected it last turn, if any.
+    Both are called before advance().
 
     Win conditions
     --------------
@@ -175,19 +176,31 @@ class Simulation:
             drone.move(*target)
 
     def move_vessel(self) -> None:
-        """Move RedVessel one step toward the infiltration zone (baseline behavior).
+        """Move RedVessel one step: flees the nearest drone that detected it last turn,
+        or heads toward the infiltration zone if it wasn't detected (baseline behavior).
 
-        Called externally before advance(), matching move_drones()'s pattern.
+        Called externally before advance(), matching move_drones()'s pattern. Reacts to
+        the most recently computed detections (advance() hasn't run yet this turn).
         """
         if self._result is not GameResult.IN_PROGRESS:
             return
 
-        target = red_baseline_target(
-            position=(self._red_vessel.row, self._red_vessel.col),
-            zone=self._infiltration_zone,
-            speed=self._vessel_speed,
-            grid=self._grid,
-        )
+        position = (self._red_vessel.row, self._red_vessel.col)
+        if self._last_detection_events:
+            threats = [
+                (self._drones[e["drone_idx"]].row, self._drones[e["drone_idx"]].col)
+                for e in self._last_detection_events
+            ]
+            target = red_evasion_target(
+                position=position, threats=threats, speed=self._vessel_speed, grid=self._grid
+            )
+        else:
+            target = red_baseline_target(
+                position=position,
+                zone=self._infiltration_zone,
+                speed=self._vessel_speed,
+                grid=self._grid,
+            )
         self._red_vessel.move(*target)
 
     def advance(self) -> GameResult:

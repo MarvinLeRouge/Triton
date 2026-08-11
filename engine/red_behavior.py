@@ -40,3 +40,23 @@ def red_baseline_target(
     step_r = max(-speed, min(speed, target_row - row))
     step_c = max(-speed, min(speed, target_col - col))
     return grid.clamp(row + step_r, col + step_c)
+
+
+def _chebyshev(a: tuple[int, int], b: tuple[int, int]) -> int:
+    return max(abs(a[0] - b[0]), abs(a[1] - b[1]))
+
+
+def _sign(x: int) -> int:
+    return (x > 0) - (x < 0)
+
+
+def red_evasion_target(
+    position: tuple[int, int], threats: list[tuple[int, int]], speed: int, grid: Grid
+) -> tuple[int, int]:
+    """Return RedVessel's next cell: a step of up to `speed` directly away from the
+    nearest threat (drone that detected it this turn), ignoring the infiltration zone."""
+    row, col = position
+    nearest = min(threats, key=lambda t: _chebyshev(position, t))
+    step_r = _sign(row - nearest[0]) * speed
+    step_c = _sign(col - nearest[1]) * speed
+    return grid.clamp(row + step_r, col + step_c)
