@@ -10,6 +10,29 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [0.3.0] — 2026-08-11 — Phase 3: Bayesian Map
+
+### Added
+
+**Engine**
+- `ProbabilityMap` — 1:1 probability-of-presence grid, informed prior weighted toward RedVessel's north/east/south spawn bands, floor value to keep every cell reachable by future updates
+- `ProbabilityMap.update()` — Bayesian update from a drone's sonar sweep outcome: a positive detection rules out cells outside that drone's cone, a negative sweep scales in-cone cells by `SonarModel.pod()`
+- `ProbabilityMap.diffuse()` — temporal diffusion: each cell keeps a `stay_weight` share of its mass, the rest spreads across its 8 neighbors, modeling RedVessel's possible movement between sweeps
+- `Simulation` — runs a Bayesian update per drone sweep and one `diffuse()` per turn, exposed via a `probability_map` property (injectable) and in `to_dict()`
+
+**API**
+- `WebSocket /ws/game` — now includes `probability_map` (grid-shaped array of floats) in each frame
+
+**Frontend**
+- `heatmapIntensity()` / `drawHeatmapCell()` — pure canvas helpers normalizing and rendering the probability map
+- `GameCanvas` — probability map rendered as a translucent heatmap layer behind the grid and entities, updating live each turn
+
+### Fixed
+
+- `api/main.py::_new_game()` — `RedVessel` could spawn on the same cell as `BlueMothership` or a `BlueDrone`, crashing `Simulation.__init__`; extracted `_spawn_red_vessel()` now retries until the picked cell is free
+
+---
+
 ## [0.2.0] — 2026-06-22 — Phase 2: Sonar Model
 
 ### Added
