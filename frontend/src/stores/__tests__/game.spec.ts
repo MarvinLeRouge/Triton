@@ -43,8 +43,20 @@ const SAMPLE_STATE: GameState = {
   result: 'in_progress',
   mothership: { row: 5, col: 3 },
   drones: [
-    { row: 4, col: 3, heading: [0, 1] },
-    { row: 6, col: 4, heading: [1, 0] },
+    {
+      row: 4,
+      col: 3,
+      heading: [0, 1],
+      detection_state: 'searching',
+      strategy: 'greedy_max_probability',
+    },
+    {
+      row: 6,
+      col: 4,
+      heading: [1, 0],
+      detection_state: 'searching',
+      strategy: 'frontier_coverage',
+    },
   ],
   vessel: { row: 10, col: 40 },
   detection_events: [],

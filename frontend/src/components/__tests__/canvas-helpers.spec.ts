@@ -3,9 +3,13 @@ import { describe, expect, it } from 'vitest'
 import {
   cellToPixelX,
   cellToPixelY,
+  detectionStateColor,
   drawCone,
+  drawDetectionRing,
   drawHeatmapCell,
+  drawStrategyLabel,
   heatmapIntensity,
+  strategyLabel,
 } from '../canvas-helpers'
 
 describe('cellToPixelX', () => {
@@ -51,7 +55,12 @@ describe('cellToPixelY', () => {
 class FakeCtx {
   ops: string[] = []
   fillStyle = ''
+  strokeStyle = ''
+  lineWidth = 0
+  font = ''
+  textAlign = ''
   fillRectArgs: number[][] = []
+  fillTextArgs: [string, number, number][] = []
 
   beginPath(): void {
     this.ops.push('beginPath')
@@ -71,6 +80,13 @@ class FakeCtx {
   fillRect(x: number, y: number, w: number, h: number): void {
     this.ops.push('fillRect')
     this.fillRectArgs.push([x, y, w, h])
+  }
+  stroke(): void {
+    this.ops.push('stroke')
+  }
+  fillText(text: string, x: number, y: number): void {
+    this.ops.push('fillText')
+    this.fillTextArgs.push([text, x, y])
   }
 }
 
@@ -155,5 +171,80 @@ describe('drawHeatmapCell', () => {
     const lowAlpha = Number(lowCtx.fillStyle.match(/[\d.]+(?=\))/)?.[0])
     const highAlpha = Number(highCtx.fillStyle.match(/[\d.]+(?=\))/)?.[0])
     expect(highAlpha).toBeGreaterThan(lowAlpha)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// detectionStateColor
+// ---------------------------------------------------------------------------
+
+describe('detectionStateColor', () => {
+  it('searching → transparent', () => {
+    expect(detectionStateColor('searching')).toBe('transparent')
+  })
+
+  it('signaling → a color', () => {
+    expect(detectionStateColor('signaling')).not.toBe('transparent')
+  })
+
+  it('confirming → a color', () => {
+    expect(detectionStateColor('confirming')).not.toBe('transparent')
+  })
+
+  it('tracking → a color', () => {
+    expect(detectionStateColor('tracking')).not.toBe('transparent')
+  })
+
+  it('unknown state → transparent', () => {
+    expect(detectionStateColor('unknown')).toBe('transparent')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// strategyLabel
+// ---------------------------------------------------------------------------
+
+describe('strategyLabel', () => {
+  it('greedy_max_probability → GMP', () => {
+    expect(strategyLabel('greedy_max_probability')).toBe('GMP')
+  })
+
+  it('frontier_coverage → FC', () => {
+    expect(strategyLabel('frontier_coverage')).toBe('FC')
+  })
+
+  it('single word → its first letter uppercased', () => {
+    expect(strategyLabel('greedy')).toBe('G')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// drawDetectionRing
+// ---------------------------------------------------------------------------
+
+describe('drawDetectionRing', () => {
+  it('transparent color → does not draw', () => {
+    const ctx = new FakeCtx()
+    drawDetectionRing(ctx as unknown as CanvasRenderingContext2D, 10, 10, 5, 'transparent')
+    expect(ctx.ops).not.toContain('stroke')
+  })
+
+  it('a real color → strokes an arc', () => {
+    const ctx = new FakeCtx()
+    drawDetectionRing(ctx as unknown as CanvasRenderingContext2D, 10, 10, 5, '#ff0000')
+    expect(ctx.ops).toEqual(['beginPath', 'arc', 'stroke'])
+    expect(ctx.strokeStyle).toBe('#ff0000')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// drawStrategyLabel
+// ---------------------------------------------------------------------------
+
+describe('drawStrategyLabel', () => {
+  it('draws the label text at the given position', () => {
+    const ctx = new FakeCtx()
+    drawStrategyLabel(ctx as unknown as CanvasRenderingContext2D, 12, 8, 'GMP')
+    expect(ctx.fillTextArgs).toEqual([['GMP', 12, 8]])
   })
 })
