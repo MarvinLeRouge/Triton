@@ -83,8 +83,7 @@ async def ws_game(websocket: WebSocket) -> None:
         await websocket.send_json(sim.to_dict())
         while sim.result is GameResult.IN_PROGRESS:
             await asyncio.sleep(STEP_INTERVAL)
-            for drone in sim.drones:
-                _random_move(drone, sim.grid, rng, max_delta=2)
+            sim.move_drones()
             prev_row, prev_col = sim.vessel.row, sim.vessel.col
             _random_move(sim.vessel, sim.grid, rng, max_delta=1)
             sim.notify_vessel_moved((sim.vessel.row, sim.vessel.col) != (prev_row, prev_col))
