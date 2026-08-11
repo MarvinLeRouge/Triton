@@ -1,6 +1,6 @@
 import random
 
-from engine.entities import BlueDrone, BlueMothership, RedVessel
+from engine.entities import BlueDrone, BlueMothership, DetectionState, RedVessel
 from engine.grid import Grid
 from engine.probability_map import ProbabilityMap
 from engine.search_strategy import GreedyMaxProbability, SearchStrategy
@@ -130,3 +130,46 @@ def test_default_strategy_assignment_uses_simulation_rng_for_determinism() -> No
     sim2.move_drones()
 
     assert (d1.row, d1.col) == (d2.row, d2.col)
+
+
+# ---------------------------------------------------------------------------
+# Detection state integration
+# ---------------------------------------------------------------------------
+
+
+def test_advance_moves_drone_detection_state_to_signaling_on_first_contact() -> None:
+    sim, d, v = _make(d_pos=(1, 1), v_pos=(9, 9))
+    v.move(1, 1)  # same cell as drone → guaranteed detection (range_cells=0 special case)
+
+    sim.advance()
+
+    assert d.detection_state is DetectionState.SIGNALING
+
+
+def test_advance_keeps_drone_detection_state_searching_without_contact() -> None:
+    sim, d, v = _make(d_pos=(1, 1), v_pos=(9, 9))
+
+    sim.advance()
+
+    assert d.detection_state is DetectionState.SEARCHING
+
+
+def test_advance_builds_up_drone_detection_state_over_consecutive_turns() -> None:
+    sim, d, v = _make(d_pos=(1, 1), v_pos=(9, 9))
+    v.move(1, 1)
+
+    sim.advance()  # streak=1 → SIGNALING
+    sim.advance()  # streak=2 → CONFIRMING
+    sim.advance()  # streak=3 → TRACKING
+
+    assert d.detection_state is DetectionState.TRACKING
+
+
+def test_to_dict_includes_drone_detection_state() -> None:
+    sim, d, v = _make(d_pos=(1, 1), v_pos=(9, 9))
+    v.move(1, 1)
+    sim.advance()
+
+    state = sim.to_dict()
+
+    assert state["drones"][0]["detection_state"] == "signaling"

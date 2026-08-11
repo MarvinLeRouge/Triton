@@ -119,6 +119,7 @@ class Simulation:
                 vessel_moved=self._vessel_moved,
                 detection_streak=self._detection_streak,
             )
+            drone.update_detection(detected, self._lock_turns)
             if detected:
                 events.append({"drone_idx": i, "pod": round(pod, 3)})
         return events
@@ -221,7 +222,13 @@ class Simulation:
             "result": self._result.value,
             "mothership": {"row": self._mothership.row, "col": self._mothership.col},
             "drones": [
-                {"row": d.row, "col": d.col, "heading": list(d.heading)} for d in self._drones
+                {
+                    "row": d.row,
+                    "col": d.col,
+                    "heading": list(d.heading),
+                    "detection_state": d.detection_state.value,
+                }
+                for d in self._drones
             ],
             "vessel": {"row": self._red_vessel.row, "col": self._red_vessel.col},
             "detection_events": self._last_detection_events,
