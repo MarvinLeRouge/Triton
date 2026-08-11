@@ -31,16 +31,7 @@ def _new_game() -> Simulation:
                 drones.append(BlueDrone(grid=grid, row=row, col=col))
                 break
 
-    border = rng.choice(["north", "east", "south"])
-    dist = rng.randint(2, 6)
-    match border:
-        case "north":
-            v_row, v_col = dist, rng.randint(0, grid.cols - 1)
-        case "east":
-            v_row, v_col = rng.randint(0, grid.rows - 1), grid.cols - 1 - dist
-        case _:
-            v_row, v_col = grid.rows - 1 - dist, rng.randint(0, grid.cols - 1)
-    vessel = RedVessel(grid=grid, row=v_row, col=v_col)
+    vessel = _spawn_red_vessel(grid, rng, occupied)
 
     return Simulation(
         grid=grid,
@@ -49,6 +40,22 @@ def _new_game() -> Simulation:
         red_vessel=vessel,
         rng=random.Random(),
     )
+
+
+def _spawn_red_vessel(grid: Grid, rng: random.Random, occupied: set[tuple[int, int]]) -> RedVessel:
+    """Place RedVessel on a random north/east/south border cell, avoiding `occupied`."""
+    border = rng.choice(["north", "east", "south"])
+    dist = rng.randint(2, 6)
+    while True:
+        match border:
+            case "north":
+                v_row, v_col = dist, rng.randint(0, grid.cols - 1)
+            case "east":
+                v_row, v_col = rng.randint(0, grid.rows - 1), grid.cols - 1 - dist
+            case _:
+                v_row, v_col = grid.rows - 1 - dist, rng.randint(0, grid.cols - 1)
+        if (v_row, v_col) not in occupied:
+            return RedVessel(grid=grid, row=v_row, col=v_col)
 
 
 def _random_move(
