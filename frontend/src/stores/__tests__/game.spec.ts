@@ -48,6 +48,10 @@ const SAMPLE_STATE: GameState = {
   ],
   vessel: { row: 10, col: 40 },
   detection_events: [],
+  probability_map: [
+    [0.5, 0.5],
+    [0.5, 0.5],
+  ],
 }
 
 beforeEach(() => {
