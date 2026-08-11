@@ -1,6 +1,6 @@
 import pytest
 
-from engine.entities import BlueDrone, BlueMothership, Entity, Faction, RedVessel
+from engine.entities import BlueDrone, BlueMothership, DetectionState, Entity, Faction, RedVessel
 from engine.grid import Grid
 
 # ---------------------------------------------------------------------------
@@ -153,3 +153,86 @@ def test_drone_heading_updates_on_diagonal_move() -> None:
     d = BlueDrone(grid=g, row=5, col=5)
     d.move(6, 6)
     assert d.heading == (1, 1)
+
+
+# ---------------------------------------------------------------------------
+# BlueDrone — detection state
+# ---------------------------------------------------------------------------
+
+
+def test_drone_initial_detection_state_is_searching() -> None:
+    g = Grid()
+    d = BlueDrone(grid=g, row=5, col=5)
+    assert d.detection_state is DetectionState.SEARCHING
+
+
+def test_drone_first_detection_moves_to_signaling() -> None:
+    g = Grid()
+    d = BlueDrone(grid=g, row=5, col=5)
+    d.update_detection(True)
+    assert d.detection_state is DetectionState.SIGNALING
+
+
+def test_drone_second_consecutive_detection_moves_to_confirming() -> None:
+    g = Grid()
+    d = BlueDrone(grid=g, row=5, col=5)
+    d.update_detection(True)
+    d.update_detection(True)
+    assert d.detection_state is DetectionState.CONFIRMING
+
+
+def test_drone_third_consecutive_detection_moves_to_tracking() -> None:
+    g = Grid()
+    d = BlueDrone(grid=g, row=5, col=5)
+    d.update_detection(True)
+    d.update_detection(True)
+    d.update_detection(True)
+    assert d.detection_state is DetectionState.TRACKING
+
+
+def test_drone_stays_tracking_with_further_detections() -> None:
+    g = Grid()
+    d = BlueDrone(grid=g, row=5, col=5)
+    for _ in range(5):
+        d.update_detection(True)
+    assert d.detection_state is DetectionState.TRACKING
+
+
+def test_drone_lost_contact_returns_immediately_to_searching() -> None:
+    g = Grid()
+    d = BlueDrone(grid=g, row=5, col=5)
+    d.update_detection(True)
+    d.update_detection(True)
+    d.update_detection(True)  # TRACKING
+    d.update_detection(False)
+    assert d.detection_state is DetectionState.SEARCHING
+
+
+def test_drone_detection_streak_restarts_after_lost_contact() -> None:
+    g = Grid()
+    d = BlueDrone(grid=g, row=5, col=5)
+    d.update_detection(True)
+    d.update_detection(False)
+    d.update_detection(True)
+    assert d.detection_state is DetectionState.SIGNALING  # streak restarted at 1, not 2
+
+
+def test_two_drones_track_detection_state_independently() -> None:
+    g = Grid()
+    d1 = BlueDrone(grid=g, row=5, col=5)
+    d2 = BlueDrone(grid=g, row=6, col=6)
+    d1.update_detection(True)
+    d1.update_detection(True)
+    d1.update_detection(True)
+    d2.update_detection(True)
+    assert d1.detection_state is DetectionState.TRACKING
+    assert d2.detection_state is DetectionState.SIGNALING
+
+
+def test_custom_tracking_threshold() -> None:
+    g = Grid()
+    d = BlueDrone(grid=g, row=5, col=5)
+    d.update_detection(True, tracking_threshold=2)
+    assert d.detection_state is DetectionState.CONFIRMING  # streak=1 == threshold-1
+    d.update_detection(True, tracking_threshold=2)
+    assert d.detection_state is DetectionState.TRACKING  # streak=2 >= threshold

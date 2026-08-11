@@ -85,3 +85,9 @@ def test_drones_have_heading_field(client: TestClient) -> None:
         data = ws.receive_json()
         assert all("heading" in d for d in data["drones"])
         assert all(len(d["heading"]) == 2 for d in data["drones"])
+
+
+def test_drones_have_detection_state_field(client: TestClient) -> None:
+    with client.websocket_connect("/ws/game") as ws:
+        data = ws.receive_json()
+        assert all("detection_state" in d for d in data["drones"])

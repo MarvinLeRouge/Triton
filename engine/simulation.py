@@ -7,7 +7,9 @@ from typing import Any
 from engine.entities import BlueDrone, BlueMothership, RedVessel
 from engine.grid import Grid
 from engine.probability_map import ProbabilityMap
+from engine.search_strategy import FrontierCoverage, GreedyMaxProbability
 from engine.sonar_model import SonarModel
+from engine.strategy_assignment import StrategyAssignment
 
 
 class GameResult(StrEnum):
@@ -20,7 +22,9 @@ class Simulation:
     """Turn-based simulation rule engine.
 
     Entities are moved externally between turns; advance() evaluates the
-    resulting board state and updates win-condition counters.
+    resulting board state and updates win-condition counters. Drones move
+    via move_drones() (per their assigned SearchStrategy); RedVessel is
+    still moved by the caller. Both are called before advance().
 
     Win conditions
     --------------
@@ -52,6 +56,8 @@ class Simulation:
         rng: random.Random | None = None,
         sonar: SonarModel | None = None,
         probability_map: ProbabilityMap | None = None,
+        strategy_assignment: StrategyAssignment | None = None,
+        drone_speed: int = 2,
     ) -> None:
         positions = (
             [(mothership.row, mothership.col)]
@@ -73,6 +79,16 @@ class Simulation:
         self._sonar = sonar if sonar is not None else SonarModel()
         self._probability_map = (
             probability_map if probability_map is not None else ProbabilityMap(grid)
+        )
+        self._drone_speed = drone_speed
+        self._strategy_assignment = (
+            strategy_assignment
+            if strategy_assignment is not None
+            else StrategyAssignment(
+                strategies=[GreedyMaxProbability(), FrontierCoverage()],
+                drone_count=len(drones),
+                rng=self._rng,
+            )
         )
 
         self._turn: int = 0
@@ -105,6 +121,7 @@ class Simulation:
                 vessel_moved=self._vessel_moved,
                 detection_streak=self._detection_streak,
             )
+            drone.update_detection(detected, self._lock_turns)
             if detected:
                 events.append({"drone_idx": i, "pod": round(pod, 3)})
         return events
@@ -121,6 +138,35 @@ class Simulation:
     def notify_vessel_moved(self, moved: bool) -> None:
         """Signal whether RedVessel moved this turn, before calling advance()."""
         self._vessel_moved = moved
+
+    def move_drones(self) -> None:
+        """Move each drone according to its currently assigned search strategy.
+
+        Called externally before advance(), matching notify_vessel_moved()'s
+        pattern: Simulation evaluates state but never moves entities on its
+        own initiative.
+
+        Drones claim distinct cells within the same turn: if a drone's computed
+        target is already claimed by an earlier drone this turn, it stays in
+        place instead of stacking on top of it.
+        """
+        if self._result is not GameResult.IN_PROGRESS:
+            return
+
+        self._strategy_assignment.advance()
+        claimed: set[tuple[int, int]] = set()
+        for i, drone in enumerate(self._drones):
+            strategy = self._strategy_assignment.strategy_for(i)
+            target = strategy.next_target(
+                position=(drone.row, drone.col),
+                speed=self._drone_speed,
+                grid=self._grid,
+                probability_map=self._probability_map,
+            )
+            if target in claimed:
+                target = (drone.row, drone.col)
+            claimed.add(target)
+            drone.move(*target)
 
     def advance(self) -> GameResult:
         """Evaluate the current board state and advance one turn."""
@@ -189,7 +235,13 @@ class Simulation:
             "result": self._result.value,
             "mothership": {"row": self._mothership.row, "col": self._mothership.col},
             "drones": [
-                {"row": d.row, "col": d.col, "heading": list(d.heading)} for d in self._drones
+                {
+                    "row": d.row,
+                    "col": d.col,
+                    "heading": list(d.heading),
+                    "detection_state": d.detection_state.value,
+                }
+                for d in self._drones
             ],
             "vessel": {"row": self._red_vessel.row, "col": self._red_vessel.col},
             "detection_events": self._last_detection_events,
