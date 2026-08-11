@@ -83,4 +83,4 @@ uv run uvicorn api.main:app --reload
 - [ ] **Phase 4 — Intelligence des drones** : stratégies de recherche, machine à états de détection
 - [ ] **Phase 5 — Comportement Red** : évasion, objectif d'infiltration
 - [ ] **Phase 6 — Coordination multi-drones** : fusion de cartes, regroupement de la flotte
-- [ ] **Phase 7 — Finalisation & scénarios** : configuration, rejouabilité, déploiement de démo
+- [ ] **Phase 7 — Finalisation & scénarios** : configuration, rejouabilité, audit sécurité OWASP, passe design, déploiement de démo local/distant
