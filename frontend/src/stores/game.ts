@@ -26,6 +26,7 @@ export interface GameState {
   drones: DroneState[]
   vessel: Position
   detection_events: DetectionEvent[]
+  probability_map: number[][]
 }
 
 function buildWsUrl(): string {

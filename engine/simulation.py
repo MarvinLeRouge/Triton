@@ -6,6 +6,7 @@ from typing import Any
 
 from engine.entities import BlueDrone, BlueMothership, RedVessel
 from engine.grid import Grid
+from engine.probability_map import ProbabilityMap
 from engine.sonar_model import SonarModel
 
 
@@ -50,6 +51,7 @@ class Simulation:
         engagement_turns: int = 2,
         rng: random.Random | None = None,
         sonar: SonarModel | None = None,
+        probability_map: ProbabilityMap | None = None,
     ) -> None:
         positions = (
             [(mothership.row, mothership.col)]
@@ -69,6 +71,9 @@ class Simulation:
         self._engagement_turns = engagement_turns
         self._rng = rng if rng is not None else random.Random()
         self._sonar = sonar if sonar is not None else SonarModel()
+        self._probability_map = (
+            probability_map if probability_map is not None else ProbabilityMap(grid)
+        )
 
         self._turn: int = 0
         self._detection_streak: int = 0
@@ -91,6 +96,14 @@ class Simulation:
                 vessel_moved=self._vessel_moved,
                 detection_streak=self._detection_streak,
                 rng=self._rng,
+            )
+            self._probability_map.update(
+                sonar=self._sonar,
+                drone=(drone.row, drone.col),
+                heading=drone.heading,
+                detected=detected,
+                vessel_moved=self._vessel_moved,
+                detection_streak=self._detection_streak,
             )
             if detected:
                 events.append({"drone_idx": i, "pod": round(pod, 3)})
@@ -116,6 +129,7 @@ class Simulation:
 
         self._turn += 1
         self._last_detection_events = self._compute_detections()
+        self._probability_map.diffuse()
         detected = len(self._last_detection_events) > 0
         in_range = self._in_mothership_range()
 
@@ -164,6 +178,10 @@ class Simulation:
     def vessel(self) -> RedVessel:
         return self._red_vessel
 
+    @property
+    def probability_map(self) -> ProbabilityMap:
+        return self._probability_map
+
     def to_dict(self) -> dict[str, Any]:
         """Serialize the current game state to a JSON-compatible dict."""
         return {
@@ -175,4 +193,5 @@ class Simulation:
             ],
             "vessel": {"row": self._red_vessel.row, "col": self._red_vessel.col},
             "detection_events": self._last_detection_events,
+            "probability_map": self._probability_map.values.round(4).tolist(),
         }
