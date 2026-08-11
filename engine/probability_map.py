@@ -10,10 +10,7 @@ from engine.sonar_model import SonarModel
 
 
 class ProbabilityMap:
-    """1:1 probability-of-presence map over the grid.
-
-    Temporal diffusion is added in a later Phase 3 branch.
-    """
+    """1:1 probability-of-presence map over the grid."""
 
     def __init__(
         self,
@@ -67,6 +64,30 @@ class ProbabilityMap:
         total = posterior.sum()
         if total > 0:
             self._values = posterior / total
+
+    def diffuse(self, stay_weight: float = 0.6) -> None:
+        """Spread probability mass to the 8 neighboring cells for one turn elapsed.
+
+        Models RedVessel's possible movement since the last sonar sweep: each
+        cell keeps `stay_weight` of its mass, the rest is split evenly across
+        its in-bounds neighbors. Mass that would fall outside the grid is
+        dropped and recovered by the final renormalization.
+        """
+        rows, cols = self._values.shape
+        neighbor_weight = (1.0 - stay_weight) / 8.0
+        padded = np.pad(self._values, 1, mode="constant", constant_values=0.0)
+
+        diffused = stay_weight * self._values
+        for dr in (-1, 0, 1):
+            for dc in (-1, 0, 1):
+                if dr == 0 and dc == 0:
+                    continue
+                diffused += neighbor_weight * padded[1 + dr : 1 + dr + rows, 1 + dc : 1 + dc + cols]
+
+        total = diffused.sum()
+        if total > 0:
+            diffused /= total
+        self._values = diffused
 
     @staticmethod
     def _informed_prior(
