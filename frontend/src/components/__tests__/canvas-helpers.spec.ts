@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { cellToPixelX, cellToPixelY, drawCone } from '../canvas-helpers'
+import {
+  cellToPixelX,
+  cellToPixelY,
+  drawCone,
+  drawHeatmapCell,
+  heatmapIntensity,
+} from '../canvas-helpers'
 
 describe('cellToPixelX', () => {
   it('col 0 → x 0', () => {
@@ -45,6 +51,7 @@ describe('cellToPixelY', () => {
 class FakeCtx {
   ops: string[] = []
   fillStyle = ''
+  fillRectArgs: number[][] = []
 
   beginPath(): void {
     this.ops.push('beginPath')
@@ -60,6 +67,10 @@ class FakeCtx {
   }
   fill(): void {
     this.ops.push('fill')
+  }
+  fillRect(x: number, y: number, w: number, h: number): void {
+    this.ops.push('fillRect')
+    this.fillRectArgs.push([x, y, w, h])
   }
 }
 
@@ -86,5 +97,63 @@ describe('drawCone', () => {
     const ctx = new FakeCtx()
     drawCone(ctx as unknown as CanvasRenderingContext2D, 0, 0, 1, 0, 60, 10, 'blue')
     expect(ctx.ops).toContain('arc')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// heatmapIntensity
+// ---------------------------------------------------------------------------
+
+describe('heatmapIntensity', () => {
+  it('value equal to max → 1', () => {
+    expect(heatmapIntensity(1, 1)).toBe(1)
+  })
+
+  it('value half of max → 0.5', () => {
+    expect(heatmapIntensity(0.5, 1)).toBe(0.5)
+  })
+
+  it('value of 0 → 0', () => {
+    expect(heatmapIntensity(0, 1)).toBe(0)
+  })
+
+  it('value above max is clamped to 1', () => {
+    expect(heatmapIntensity(2, 1)).toBe(1)
+  })
+
+  it('max of 0 → 0 (avoids division by zero)', () => {
+    expect(heatmapIntensity(0.3, 0)).toBe(0)
+  })
+
+  it('negative value is clamped to 0', () => {
+    expect(heatmapIntensity(-1, 1)).toBe(0)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// drawHeatmapCell
+// ---------------------------------------------------------------------------
+
+describe('drawHeatmapCell', () => {
+  it('intensity 0 → does not draw', () => {
+    const ctx = new FakeCtx()
+    drawHeatmapCell(ctx as unknown as CanvasRenderingContext2D, 10, 20, 8, 0)
+    expect(ctx.ops).not.toContain('fillRect')
+  })
+
+  it('positive intensity → fills the cell rect at (x, y, size, size)', () => {
+    const ctx = new FakeCtx()
+    drawHeatmapCell(ctx as unknown as CanvasRenderingContext2D, 10, 20, 8, 0.5)
+    expect(ctx.fillRectArgs).toEqual([[10, 20, 8, 8]])
+  })
+
+  it('higher intensity → higher alpha in fillStyle', () => {
+    const lowCtx = new FakeCtx()
+    drawHeatmapCell(lowCtx as unknown as CanvasRenderingContext2D, 0, 0, 8, 0.2)
+    const highCtx = new FakeCtx()
+    drawHeatmapCell(highCtx as unknown as CanvasRenderingContext2D, 0, 0, 8, 0.9)
+    const lowAlpha = Number(lowCtx.fillStyle.match(/[\d.]+(?=\))/)?.[0])
+    const highAlpha = Number(highCtx.fillStyle.match(/[\d.]+(?=\))/)?.[0])
+    expect(highAlpha).toBeGreaterThan(lowAlpha)
   })
 })

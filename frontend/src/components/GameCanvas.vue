@@ -8,7 +8,13 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 
-import { cellToPixelX, cellToPixelY, drawCone } from './canvas-helpers'
+import {
+  cellToPixelX,
+  cellToPixelY,
+  drawCone,
+  drawHeatmapCell,
+  heatmapIntensity,
+} from './canvas-helpers'
 import { useGameStore } from '@/stores/game'
 
 const CELL_SIZE = 10
@@ -40,18 +46,42 @@ function drawGrid(ctx: CanvasRenderingContext2D): void {
   }
 }
 
+function drawHeatmap(ctx: CanvasRenderingContext2D, map: number[][]): void {
+  let max = 0
+  for (const row of map) {
+    for (const value of row) {
+      if (value > max) max = value
+    }
+  }
+  for (let r = 0; r < map.length; r++) {
+    const row = map[r]
+    if (!row) continue
+    for (let c = 0; c < row.length; c++) {
+      const intensity = heatmapIntensity(row[c] ?? 0, max)
+      drawHeatmapCell(
+        ctx,
+        cellToPixelX(c, CELL_SIZE),
+        cellToPixelY(r, CELL_SIZE),
+        CELL_SIZE,
+        intensity,
+      )
+    }
+  }
+}
+
 function render(): void {
   const canvas = canvasRef.value
   if (!canvas || !store.gameState) return
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
-  const { mothership, drones, vessel, detection_events } = store.gameState
+  const { mothership, drones, vessel, detection_events, probability_map } = store.gameState
   const half = CELL_SIZE / 2
 
   flashingDrones.value = new Set(detection_events.map((e) => e.drone_idx))
 
   ctx.clearRect(0, 0, CANVAS_W, CANVAS_H)
+  drawHeatmap(ctx, probability_map)
   drawGrid(ctx)
 
   // Cones — rendered behind entities

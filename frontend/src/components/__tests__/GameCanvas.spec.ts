@@ -41,6 +41,10 @@ const DETECTION_GAME_STATE: GameState = {
   ],
   vessel: { row: 20, col: 30 },
   detection_events: [{ drone_idx: 0, pod: 0.74 }],
+  probability_map: [
+    [0.5, 0.5],
+    [0.5, 0.5],
+  ],
 }
 
 describe('GameCanvas', () => {
