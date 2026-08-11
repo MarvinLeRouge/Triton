@@ -10,6 +10,25 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [0.4.0] — 2026-08-11 — Phase 4: Drone Intelligence
+
+### Added
+
+**Engine**
+- `SearchStrategy` — interface for per-drone movement decisions: `GreedyMaxProbability` (highest-probability reachable cell) and `FrontierCoverage` (nearest reachable cell above the map's mean probability, falls back to the max)
+- `StrategyAssignment` — assigns an initial random strategy per drone, `advance()` rolls each drone's own independent per-turn switch chance for an irregular, per-drone cadence
+- `Simulation.move_drones()` — moves each drone per its assigned strategy, called externally before `advance()` (preserves the "entities moved externally" contract); de-conflicts drones that would otherwise target the same cell
+- `DetectionState` — per-drone detection state machine (`SEARCHING`/`SIGNALING`/`CONFIRMING`/`TRACKING`), driven by each drone's own consecutive-detection streak, independent of the simulation's global win-condition streak
+- `SearchStrategy.name` — stable identifier per strategy, exposed per drone
+
+**API**
+- `WebSocket /ws/game` — drones now move per their assigned strategy instead of a random walk; each drone's frame includes `detection_state` and `strategy`
+
+**Frontend**
+- `GameCanvas` — colored ring around each drone for its detection state, initials label for its active strategy
+
+---
+
 ## [0.3.0] — 2026-08-11 — Phase 3: Bayesian Map
 
 ### Added
