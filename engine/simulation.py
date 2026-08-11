@@ -22,7 +22,9 @@ class Simulation:
     """Turn-based simulation rule engine.
 
     Entities are moved externally between turns; advance() evaluates the
-    resulting board state and updates win-condition counters.
+    resulting board state and updates win-condition counters. Drones move
+    via move_drones() (per their assigned SearchStrategy); RedVessel is
+    still moved by the caller. Both are called before advance().
 
     Win conditions
     --------------
@@ -143,8 +145,16 @@ class Simulation:
         Called externally before advance(), matching notify_vessel_moved()'s
         pattern: Simulation evaluates state but never moves entities on its
         own initiative.
+
+        Drones claim distinct cells within the same turn: if a drone's computed
+        target is already claimed by an earlier drone this turn, it stays in
+        place instead of stacking on top of it.
         """
+        if self._result is not GameResult.IN_PROGRESS:
+            return
+
         self._strategy_assignment.advance()
+        claimed: set[tuple[int, int]] = set()
         for i, drone in enumerate(self._drones):
             strategy = self._strategy_assignment.strategy_for(i)
             target = strategy.next_target(
@@ -153,6 +163,9 @@ class Simulation:
                 grid=self._grid,
                 probability_map=self._probability_map,
             )
+            if target in claimed:
+                target = (drone.row, drone.col)
+            claimed.add(target)
             drone.move(*target)
 
     def advance(self) -> GameResult:

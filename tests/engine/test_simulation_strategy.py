@@ -3,10 +3,11 @@ import random
 from engine.entities import BlueDrone, BlueMothership, DetectionState, RedVessel
 from engine.grid import Grid
 from engine.probability_map import ProbabilityMap
-from engine.search_strategy import GreedyMaxProbability, SearchStrategy
+from engine.search_strategy import GreedyMaxProbability
 from engine.simulation import Simulation
 from engine.sonar_model import SonarModel
 from engine.strategy_assignment import StrategyAssignment
+from tests.engine.conftest import _FixedSequenceRandom
 
 
 class _FixedTargetStrategy:
@@ -23,20 +24,6 @@ class _FixedTargetStrategy:
         probability_map: ProbabilityMap,
     ) -> tuple[int, int]:
         return self._target
-
-
-class _FixedSequenceRandom:
-    """Deterministic stand-in for random.Random: returns queued values in order."""
-
-    def __init__(self, randoms: list[float], choices: list[SearchStrategy]) -> None:
-        self._randoms = list(randoms)
-        self._choices = list(choices)
-
-    def random(self) -> float:
-        return self._randoms.pop(0)
-
-    def choice(self, seq: list[SearchStrategy]) -> SearchStrategy:
-        return self._choices.pop(0)
 
 
 def _make(
@@ -132,6 +119,33 @@ def test_default_strategy_assignment_uses_simulation_rng_for_determinism() -> No
     assert (d1.row, d1.col) == (d2.row, d2.col)
 
 
+def test_move_drones_deconflicts_drones_targeting_the_same_cell() -> None:
+    fixed = _FixedTargetStrategy(target=(3, 3))
+    assignment = StrategyAssignment(
+        strategies=[fixed], drone_count=2, switch_probability=0.0, rng=random.Random(0)
+    )  # type: ignore[arg-type]
+    g = Grid(rows=10, cols=10)
+    m = BlueMothership(grid=g, row=0, col=0)
+    d1 = BlueDrone(grid=g, row=1, col=1)
+    d2 = BlueDrone(grid=g, row=2, col=2)
+    v = RedVessel(grid=g, row=9, col=9)
+    sim = Simulation(
+        grid=g,
+        mothership=m,
+        drones=[d1, d2],
+        red_vessel=v,
+        rng=random.Random(42),
+        sonar=SonarModel(range_cells=0),
+        strategy_assignment=assignment,
+    )
+
+    sim.move_drones()
+
+    assert (d1.row, d1.col) != (d2.row, d2.col)
+    assert (d1.row, d1.col) == (3, 3)  # first drone claims the target
+    assert (d2.row, d2.col) == (2, 2)  # second drone's target was claimed, stays in place
+
+
 # ---------------------------------------------------------------------------
 # Detection state integration
 # ---------------------------------------------------------------------------
@@ -173,3 +187,17 @@ def test_to_dict_includes_drone_detection_state() -> None:
     state = sim.to_dict()
 
     assert state["drones"][0]["detection_state"] == "signaling"
+
+
+def test_global_win_condition_streak_unaffected_by_per_drone_detection_state() -> None:
+    sim, d, v = _make(m_pos=(0, 0), d_pos=(0, 4), v_pos=(9, 9))
+    v.move(0, 4)  # same cell as drone → guaranteed detection
+
+    sim.advance()  # turn 1: detection_streak=1 (global), drone detection_state=SIGNALING
+    sim.advance()  # turn 2: detection_streak=2 (global), drone detection_state=CONFIRMING
+
+    assert d.detection_state is DetectionState.CONFIRMING
+    assert sim.result.value == "in_progress"  # lock_turns default is 3, not reached yet
+    sim.advance()  # turn 3: detection_streak=3 >= lock_turns=3; engagement also satisfied (mothership at (0,0), vessel at (0,4), Chebyshev=4 <= default mothership_range=5)
+    assert d.detection_state is DetectionState.TRACKING
+    assert sim.result.value == "blue_wins"

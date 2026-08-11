@@ -95,7 +95,12 @@ class BlueDrone(Entity):
         super().move(row, col)
 
     def update_detection(self, detected: bool, tracking_threshold: int = 3) -> None:
-        """Update this drone's own consecutive-detection streak and state."""
+        """Update this drone's own consecutive-detection streak and state.
+
+        Note: all four states are only reachable when tracking_threshold >= 3.
+        At tracking_threshold=2, SIGNALING becomes unreachable; at
+        tracking_threshold<=1, both SIGNALING and CONFIRMING become unreachable.
+        """
         self._detection_streak = self._detection_streak + 1 if detected else 0
         self._detection_state = _state_for_streak(self._detection_streak, tracking_threshold)
 
