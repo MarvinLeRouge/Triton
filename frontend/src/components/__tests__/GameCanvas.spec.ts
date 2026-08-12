@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { nextTick } from 'vue'
 
 import GameCanvas from '../GameCanvas.vue'
 import type { GameState } from '@/stores/game'
@@ -98,7 +99,7 @@ describe('GameCanvas', () => {
     expect(closeCalled).toBe(true)
   })
 
-  it('renders without error when detection_events present', () => {
+  it('draws entities on the canvas when game state arrives', async () => {
     class CapturingMock extends WsMock {
       static instances: CapturingMock[] = []
       constructor() {
@@ -108,8 +109,46 @@ describe('GameCanvas', () => {
     }
     CapturingMock.instances = []
     vi.stubGlobal('WebSocket', CapturingMock)
-    mountCanvas()
+    const wrapper = mountCanvas()
+    const canvas = wrapper.find('canvas').element as HTMLCanvasElement
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+    const fillRectSpy = vi.spyOn(ctx, 'fillRect')
+    const arcSpy = vi.spyOn(ctx, 'arc')
+
     CapturingMock.instances[0]?.onmessage?.({ data: JSON.stringify(DETECTION_GAME_STATE) })
-    expect(true).toBe(true)
+    await nextTick()
+
+    // fillRect: heatmap cells + BlueMothership marker; arc: drone circles + cones + detection ring
+    expect(fillRectSpy).toHaveBeenCalled()
+    expect(arcSpy).toHaveBeenCalled()
+  })
+
+  it('flashes the detecting drone orange in its cone color', async () => {
+    class CapturingMock extends WsMock {
+      static instances: CapturingMock[] = []
+      constructor() {
+        super()
+        CapturingMock.instances.push(this)
+      }
+    }
+    CapturingMock.instances = []
+    vi.stubGlobal('WebSocket', CapturingMock)
+    const wrapper = mountCanvas()
+    const canvas = wrapper.find('canvas').element as HTMLCanvasElement
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+    const fillStyles: unknown[] = []
+    Object.defineProperty(ctx, 'fillStyle', {
+      configurable: true,
+      get: () => fillStyles[fillStyles.length - 1],
+      set: (value: unknown) => {
+        fillStyles.push(value)
+      },
+    })
+
+    CapturingMock.instances[0]?.onmessage?.({ data: JSON.stringify(DETECTION_GAME_STATE) })
+    await nextTick()
+
+    // drone_idx 0 is in detection_events → its cone must use the orange flash color
+    expect(fillStyles).toContain('rgba(255, 140, 0, 0.4)')
   })
 })
