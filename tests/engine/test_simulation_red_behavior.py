@@ -12,6 +12,7 @@ def _make(
     v_pos: tuple[int, int] = (25, 40),
     vessel_speed: int = 1,
     sonar: SonarModel | None = None,
+    red_detection_range: int = 10,
 ) -> tuple[Simulation, RedVessel]:
     g = Grid(rows=50, cols=50)
     m = BlueMothership(grid=g, row=m_pos[0], col=m_pos[1])
@@ -25,6 +26,7 @@ def _make(
         rng=random.Random(42),
         sonar=sonar if sonar is not None else SonarModel(range_cells=0),
         vessel_speed=vessel_speed,
+        red_detection_range=red_detection_range,
     )
     return sim, v
 
@@ -48,7 +50,9 @@ def test_move_vessel_moves_toward_infiltration_zone() -> None:
 
 
 def test_move_vessel_stays_once_inside_zone() -> None:
-    sim, v = _make(v_pos=(25, 3))  # already inside the zone (cols 0-9, rows 22-27)
+    # d_pos moved away from the default (25, 5): it's only 2 cells from v_pos=(25, 3),
+    # which would otherwise trigger Red's own proximity awareness (see red-detection-range).
+    sim, v = _make(d_pos=(25, 30), v_pos=(25, 3))  # already inside the zone (cols 0-9, rows 22-27)
     sim.move_vessel()
     assert (v.row, v.col) == (25, 3)
 
@@ -142,3 +146,43 @@ def test_move_vessel_returns_to_baseline_after_losing_contact() -> None:
     sim.move_vessel()
 
     assert (v.row, v.col) == (25, 15)  # baseline resumes: heads back west, toward the zone
+
+
+# ---------------------------------------------------------------------------
+# Red's own detection range (proximity awareness, independent of Blue's sonar)
+# ---------------------------------------------------------------------------
+
+
+def test_move_vessel_flees_drone_within_own_range_even_without_blue_detection() -> None:
+    # default sonar (range_cells=0) never detects a drone that isn't co-located,
+    # so _last_detection_events stays empty — this isolates awareness-only evasion.
+    sim, v = _make(d_pos=(25, 10), v_pos=(25, 15))
+    sim.advance()
+
+    sim.move_vessel()
+
+    assert (v.row, v.col) == (
+        25,
+        16,
+    )  # senses the drone at distance 5 → flees east, away from the zone
+
+
+def test_move_vessel_ignores_mothership_proximity_for_awareness() -> None:
+    # mothership adjacent to the vessel, drone far away and undetected — the
+    # mothership must NOT trigger evasion (it's the fixed objective landmark,
+    # not a reactive threat), or infiltration would become nearly unreachable.
+    sim, v = _make(m_pos=(25, 14), d_pos=(25, 45), v_pos=(25, 15))
+    sim.advance()
+
+    sim.move_vessel()
+
+    assert (v.row, v.col) == (25, 14)  # baseline: heads toward the zone regardless
+
+
+def test_move_vessel_respects_custom_red_detection_range() -> None:
+    sim, v = _make(d_pos=(25, 10), v_pos=(25, 15), red_detection_range=3)  # distance 5 > range 3
+
+    sim.advance()
+    sim.move_vessel()
+
+    assert (v.row, v.col) == (25, 14)  # too far to sense within the reduced range → baseline

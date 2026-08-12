@@ -6,6 +6,7 @@ from engine.grid import Grid
 
 ROW_BAND_HALF = 3
 COL_DEPTH = 10
+RED_DETECTION_RANGE = 10
 
 
 @dataclass(frozen=True)
@@ -48,6 +49,16 @@ def _chebyshev(a: tuple[int, int], b: tuple[int, int]) -> int:
 
 def _sign(x: int) -> int:
     return (x > 0) - (x < 0)
+
+
+def blue_units_within_range(
+    position: tuple[int, int],
+    blue_positions: list[tuple[int, int]],
+    detection_range: int,
+) -> list[tuple[int, int]]:
+    """Return the Blue unit positions within RedVessel's own omnidirectional sensing
+    range (Chebyshev distance) — independent of whether Blue's sonar detected Red."""
+    return [p for p in blue_positions if _chebyshev(position, p) <= detection_range]
 
 
 def red_evasion_target(
