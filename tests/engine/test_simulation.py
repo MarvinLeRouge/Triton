@@ -17,7 +17,7 @@ def _make(
     mothership_range: int = 5,
     engagement_turns: int = 2,
 ) -> tuple[Simulation, BlueMothership, BlueDrone, RedVessel]:
-    g = Grid(rows=10, cols=10)
+    g = Grid(rows=10, cols=30)
     m = BlueMothership(grid=g, row=m_pos[0], col=m_pos[1])
     d = BlueDrone(grid=g, row=d_pos[0], col=d_pos[1])
     v = RedVessel(grid=g, row=v_pos[0], col=v_pos[1])
@@ -103,7 +103,8 @@ def test_detection_without_mothership_range_stays_in_progress() -> None:
 
 def test_in_range_without_detection_stays_in_progress() -> None:
     # red à portée du mothership, mais aucun drone ne le détecte
-    sim, m, d, v = _make(m_pos=(0, 0), v_pos=(0, 4), mothership_range=5)
+    # (col 15/19, not 0/4: keeps both outside the infiltration zone, cols 0-9)
+    sim, m, d, v = _make(m_pos=(0, 15), v_pos=(0, 19), mothership_range=5)
     # d reste en (1,1) → pas de détection
     sim.advance()
     sim.advance()
@@ -111,11 +112,11 @@ def test_in_range_without_detection_stays_in_progress() -> None:
 
 
 def test_blue_wins_when_all_conditions_met() -> None:
-    # mothership (0,0), red (0,4) → Chebyshev = 4 ≤ 5 → à portée
+    # mothership (0,15), red (0,19) → Chebyshev = 4 ≤ 5 → à portée
     sim, m, d, v = _make(
-        m_pos=(0, 0), v_pos=(0, 4), mothership_range=5, lock_turns=2, engagement_turns=2
+        m_pos=(0, 15), v_pos=(0, 19), mothership_range=5, lock_turns=2, engagement_turns=2
     )
-    d.move(0, 4)  # même cellule que red → détection
+    d.move(0, 19)  # même cellule que red → détection
     sim.advance()  # detection_streak=1, engagement_streak=1
     assert sim.advance() is GameResult.BLUE_WINS  # streaks=2 ≥ seuils
 
@@ -123,9 +124,9 @@ def test_blue_wins_when_all_conditions_met() -> None:
 def test_blue_wins_require_lock_before_engagement() -> None:
     # lock_turns=3, engagement_turns=2 → Blue gagne au tour 3 seulement
     sim, m, d, v = _make(
-        m_pos=(0, 0), v_pos=(0, 4), mothership_range=5, lock_turns=3, engagement_turns=2
+        m_pos=(0, 15), v_pos=(0, 19), mothership_range=5, lock_turns=3, engagement_turns=2
     )
-    d.move(0, 4)
+    d.move(0, 19)
     assert sim.advance() is GameResult.IN_PROGRESS  # streaks=1
     assert (
         sim.advance() is GameResult.IN_PROGRESS
@@ -140,27 +141,27 @@ def test_blue_wins_require_lock_before_engagement() -> None:
 
 def test_detection_streak_resets_on_lost_contact() -> None:
     sim, m, d, v = _make(
-        m_pos=(0, 0), v_pos=(0, 4), mothership_range=5, lock_turns=3, engagement_turns=3
+        m_pos=(0, 15), v_pos=(0, 19), mothership_range=5, lock_turns=3, engagement_turns=3
     )
-    d.move(0, 4)
+    d.move(0, 19)
     sim.advance()  # detection_streak=1
     d.move(1, 1)  # perte de contact
     sim.advance()  # detection_streak=0
-    d.move(0, 4)  # recontact
+    d.move(0, 19)  # recontact
     sim.advance()  # detection_streak=1
     sim.advance()  # detection_streak=2 → encore insuffisant (besoin 3)
     assert sim.result is GameResult.IN_PROGRESS
 
 
 def test_engagement_streak_resets_when_out_of_range() -> None:
-    # mothership_range=4 : (0,0)→(0,4) = Chebyshev 4 ≤ 4 → à portée
-    #                       (0,9)→(0,4) = Chebyshev 5 > 4 → hors portée
+    # mothership_range=4 : (0,15)→(0,19) = Chebyshev 4 ≤ 4 → à portée
+    #                       (0,24)→(0,19) = Chebyshev 5 > 4 → hors portée
     sim, m, d, v = _make(
-        m_pos=(0, 0), v_pos=(0, 4), mothership_range=4, lock_turns=2, engagement_turns=2
+        m_pos=(0, 15), v_pos=(0, 19), mothership_range=4, lock_turns=2, engagement_turns=2
     )
-    d.move(0, 4)  # détection
+    d.move(0, 19)  # détection
     sim.advance()  # detection_streak=1, engagement_streak=1
-    m.move(0, 9)  # mothership hors portée
+    m.move(0, 24)  # mothership hors portée
     sim.advance()  # detection_streak=2 ≥ lock, mais engagement_streak=0 → reset
     assert sim.result is GameResult.IN_PROGRESS
 
@@ -171,8 +172,8 @@ def test_engagement_streak_resets_when_out_of_range() -> None:
 
 
 def test_turn_does_not_increment_after_blue_wins() -> None:
-    sim, m, d, v = _make(m_pos=(0, 0), v_pos=(0, 4), mothership_range=5)
-    d.move(0, 4)
+    sim, m, d, v = _make(m_pos=(0, 15), v_pos=(0, 19), mothership_range=5)
+    d.move(0, 19)
     sim.advance()
     sim.advance()  # BLUE_WINS au tour 2
     sim.advance()  # ne doit pas avancer

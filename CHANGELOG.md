@@ -10,6 +10,24 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [0.5.0] — 2026-08-11 — Phase 5: Red Behavior
+
+### Added
+
+**Engine**
+- `InfiltrationZone` / `infiltration_zone_for()` — fixed-depth band hugging the west edge (10 cols), centered on BlueMothership's spawn row (6 rows); reaching it now actually wins the game for Red (previously only timeout ever did)
+- `red_baseline_target()` — RedVessel steps toward the infiltration zone instead of a random walk
+- `Simulation.move_vessel()` — moves RedVessel per its current behavior (baseline, evasion, or awareness-driven evasion), called externally before `advance()`, mirroring `move_drones()`
+- `red_evasion_target()` — RedVessel flees the nearest drone that detected it last turn, ignoring the zone that turn
+- `blue_units_within_range()` — RedVessel's own omnidirectional sensing (Chebyshev distance, default range 10), independent of Blue's sonar; adds to the evasion trigger alongside Blue-side detection. Covers drones only — BlueMothership is the fixed objective, not a reactive threat
+
+### Fixed
+
+- `api/main.py::_new_game()` — `RedVessel` could spawn already inside the infiltration zone (instant win before real play); `_spawn_red_vessel()` now also avoids it
+- `api/main.py` — removed the now-dead `_random_move()` helper; both drones and RedVessel move via `Simulation`
+
+---
+
 ## [0.4.0] — 2026-08-11 — Phase 4: Drone Intelligence
 
 ### Added

@@ -34,7 +34,7 @@ def _make(
     probability_map: ProbabilityMap | None = None,
     drone_speed: int = 2,
 ) -> tuple[Simulation, BlueDrone, RedVessel]:
-    g = Grid(rows=10, cols=10)
+    g = Grid(rows=10, cols=30)
     m = BlueMothership(grid=g, row=m_pos[0], col=m_pos[1])
     d = BlueDrone(grid=g, row=d_pos[0], col=d_pos[1])
     v = RedVessel(grid=g, row=v_pos[0], col=v_pos[1])
@@ -152,7 +152,8 @@ def test_move_drones_deconflicts_drones_targeting_the_same_cell() -> None:
 
 
 def test_advance_moves_drone_detection_state_to_signaling_on_first_contact() -> None:
-    sim, d, v = _make(d_pos=(1, 1), v_pos=(9, 9))
+    # m_pos=(8,8): its row band [5,10) keeps row 1 outside the infiltration zone
+    sim, d, v = _make(m_pos=(8, 8), d_pos=(1, 1), v_pos=(9, 9))
     v.move(1, 1)  # same cell as drone → guaranteed detection (range_cells=0 special case)
 
     sim.advance()
@@ -161,7 +162,7 @@ def test_advance_moves_drone_detection_state_to_signaling_on_first_contact() -> 
 
 
 def test_advance_keeps_drone_detection_state_searching_without_contact() -> None:
-    sim, d, v = _make(d_pos=(1, 1), v_pos=(9, 9))
+    sim, d, v = _make(m_pos=(8, 8), d_pos=(1, 1), v_pos=(9, 9))
 
     sim.advance()
 
@@ -169,7 +170,7 @@ def test_advance_keeps_drone_detection_state_searching_without_contact() -> None
 
 
 def test_advance_builds_up_drone_detection_state_over_consecutive_turns() -> None:
-    sim, d, v = _make(d_pos=(1, 1), v_pos=(9, 9))
+    sim, d, v = _make(m_pos=(8, 8), d_pos=(1, 1), v_pos=(9, 9))
     v.move(1, 1)
 
     sim.advance()  # streak=1 → SIGNALING
@@ -180,7 +181,7 @@ def test_advance_builds_up_drone_detection_state_over_consecutive_turns() -> Non
 
 
 def test_to_dict_includes_drone_detection_state() -> None:
-    sim, d, v = _make(d_pos=(1, 1), v_pos=(9, 9))
+    sim, d, v = _make(m_pos=(8, 8), d_pos=(1, 1), v_pos=(9, 9))
     v.move(1, 1)
     sim.advance()
 
@@ -201,14 +202,17 @@ def test_to_dict_includes_drone_strategy_name() -> None:
 
 
 def test_global_win_condition_streak_unaffected_by_per_drone_detection_state() -> None:
-    sim, d, v = _make(m_pos=(0, 0), d_pos=(0, 4), v_pos=(9, 9))
-    v.move(0, 4)  # same cell as drone → guaranteed detection
+    # m_pos/d_pos shifted to col 15/19 (Chebyshev distance 4 preserved) to keep
+    # both outside the infiltration zone (cols 0-9), which would otherwise
+    # freeze the game on turn 1 before the win-condition streak can build up
+    sim, d, v = _make(m_pos=(0, 15), d_pos=(0, 19), v_pos=(9, 9))
+    v.move(0, 19)  # same cell as drone → guaranteed detection
 
     sim.advance()  # turn 1: detection_streak=1 (global), drone detection_state=SIGNALING
     sim.advance()  # turn 2: detection_streak=2 (global), drone detection_state=CONFIRMING
 
     assert d.detection_state is DetectionState.CONFIRMING
     assert sim.result.value == "in_progress"  # lock_turns default is 3, not reached yet
-    sim.advance()  # turn 3: detection_streak=3 >= lock_turns=3; engagement also satisfied (mothership at (0,0), vessel at (0,4), Chebyshev=4 <= default mothership_range=5)
+    sim.advance()  # turn 3: detection_streak=3 >= lock_turns=3; engagement also satisfied (mothership at (0,15), vessel at (0,19), Chebyshev=4 <= default mothership_range=5)
     assert d.detection_state is DetectionState.TRACKING
     assert sim.result.value == "blue_wins"

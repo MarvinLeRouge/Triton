@@ -81,6 +81,6 @@ uv run uvicorn api.main:app --reload
 - [x] **Phase 2 — Modèle sonar** : cône de détection (POD), probabilité de détection
 - [x] **Phase 3 — Carte bayésienne** : carte de probabilité, mise à jour bayésienne, diffusion temporelle
 - [x] **Phase 4 — Intelligence des drones** : stratégies de recherche, machine à états de détection
-- [ ] **Phase 5 — Comportement Red** : évasion, objectif d'infiltration
+- [x] **Phase 5 — Comportement Red** : évasion, objectif d'infiltration
 - [ ] **Phase 6 — Coordination multi-drones** : fusion de cartes, regroupement de la flotte
 - [ ] **Phase 7 — Finalisation & scénarios** : configuration, rejouabilité, audit sécurité OWASP, passe design, déploiement de démo local/distant

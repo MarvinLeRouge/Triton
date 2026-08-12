@@ -6,6 +6,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from engine.entities import BlueDrone, BlueMothership, RedVessel
 from engine.grid import Grid
+from engine.red_behavior import InfiltrationZone, infiltration_zone_for
 from engine.simulation import GameResult, Simulation
 
 app = FastAPI(title="Triton API")
@@ -31,7 +32,8 @@ def _new_game() -> Simulation:
                 drones.append(BlueDrone(grid=grid, row=row, col=col))
                 break
 
-    vessel = _spawn_red_vessel(grid, rng, occupied)
+    zone = infiltration_zone_for(ms.row, grid)
+    vessel = _spawn_red_vessel(grid, rng, occupied, zone)
 
     return Simulation(
         grid=grid,
@@ -42,8 +44,14 @@ def _new_game() -> Simulation:
     )
 
 
-def _spawn_red_vessel(grid: Grid, rng: random.Random, occupied: set[tuple[int, int]]) -> RedVessel:
-    """Place RedVessel on a random north/east/south border cell, avoiding `occupied`."""
+def _spawn_red_vessel(
+    grid: Grid,
+    rng: random.Random,
+    occupied: set[tuple[int, int]],
+    infiltration_zone: InfiltrationZone,
+) -> RedVessel:
+    """Place RedVessel on a random north/east/south border cell, avoiding `occupied`
+    and the infiltration zone (spawning already-won would skip the game entirely)."""
     border = rng.choice(["north", "east", "south"])
     dist = rng.randint(2, 6)
     while True:
@@ -54,19 +62,8 @@ def _spawn_red_vessel(grid: Grid, rng: random.Random, occupied: set[tuple[int, i
                 v_row, v_col = rng.randint(0, grid.rows - 1), grid.cols - 1 - dist
             case _:
                 v_row, v_col = grid.rows - 1 - dist, rng.randint(0, grid.cols - 1)
-        if (v_row, v_col) not in occupied:
+        if (v_row, v_col) not in occupied and not infiltration_zone.contains(v_row, v_col):
             return RedVessel(grid=grid, row=v_row, col=v_col)
-
-
-def _random_move(
-    entity: BlueDrone | RedVessel, grid: Grid, rng: random.Random, max_delta: int
-) -> None:
-    """Move entity by a random delta, clamped to grid bounds."""
-    new_row, new_col = grid.clamp(
-        entity.row + rng.randint(-max_delta, max_delta),
-        entity.col + rng.randint(-max_delta, max_delta),
-    )
-    entity.move(new_row, new_col)
 
 
 @app.get("/health")
@@ -78,14 +75,13 @@ async def health() -> dict[str, str]:
 async def ws_game(websocket: WebSocket) -> None:
     await websocket.accept()
     sim = _new_game()
-    rng = random.Random()
     try:
         await websocket.send_json(sim.to_dict())
         while sim.result is GameResult.IN_PROGRESS:
             await asyncio.sleep(STEP_INTERVAL)
             sim.move_drones()
             prev_row, prev_col = sim.vessel.row, sim.vessel.col
-            _random_move(sim.vessel, sim.grid, rng, max_delta=1)
+            sim.move_vessel()
             sim.notify_vessel_moved((sim.vessel.row, sim.vessel.col) != (prev_row, prev_col))
             sim.advance()
             await websocket.send_json(sim.to_dict())
