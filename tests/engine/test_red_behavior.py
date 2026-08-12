@@ -1,6 +1,7 @@
 from engine.grid import Grid
 from engine.red_behavior import (
     InfiltrationZone,
+    blue_units_within_range,
     infiltration_zone_for,
     red_baseline_target,
     red_evasion_target,
@@ -141,3 +142,51 @@ def test_evasion_respects_grid_bounds() -> None:
     grid = Grid(rows=10, cols=10)
     target = red_evasion_target(position=(0, 0), threats=[(1, 1)], speed=1, grid=grid)
     assert grid.in_bounds(*target)
+
+
+# ---------------------------------------------------------------------------
+# blue_units_within_range
+# ---------------------------------------------------------------------------
+
+
+def test_returns_unit_within_range() -> None:
+    result = blue_units_within_range(
+        position=(20, 20), blue_positions=[(20, 25)], detection_range=10
+    )
+    assert result == [(20, 25)]
+
+
+def test_excludes_unit_beyond_range() -> None:
+    result = blue_units_within_range(
+        position=(20, 20), blue_positions=[(20, 31)], detection_range=10
+    )
+    assert result == []
+
+
+def test_includes_unit_at_exact_range_boundary() -> None:
+    result = blue_units_within_range(
+        position=(20, 20), blue_positions=[(20, 30)], detection_range=10
+    )
+    assert result == [(20, 30)]
+
+
+def test_uses_chebyshev_distance() -> None:
+    # diagonal distance (5, 5) -> Chebyshev 5, within range 5
+    result = blue_units_within_range(
+        position=(20, 20), blue_positions=[(25, 25)], detection_range=5
+    )
+    assert result == [(25, 25)]
+
+
+def test_filters_a_mix_of_in_and_out_of_range_units() -> None:
+    result = blue_units_within_range(
+        position=(20, 20),
+        blue_positions=[(20, 25), (20, 40), (15, 20)],
+        detection_range=10,
+    )
+    assert result == [(20, 25), (15, 20)]
+
+
+def test_empty_when_no_units_in_range() -> None:
+    result = blue_units_within_range(position=(20, 20), blue_positions=[], detection_range=10)
+    assert result == []

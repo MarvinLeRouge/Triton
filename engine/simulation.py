@@ -7,7 +7,13 @@ from typing import Any
 from engine.entities import BlueDrone, BlueMothership, RedVessel
 from engine.grid import Grid
 from engine.probability_map import ProbabilityMap
-from engine.red_behavior import infiltration_zone_for, red_baseline_target, red_evasion_target
+from engine.red_behavior import (
+    RED_DETECTION_RANGE,
+    blue_units_within_range,
+    infiltration_zone_for,
+    red_baseline_target,
+    red_evasion_target,
+)
 from engine.search_strategy import FrontierCoverage, GreedyMaxProbability
 from engine.sonar_model import SonarModel
 from engine.strategy_assignment import StrategyAssignment
@@ -63,6 +69,7 @@ class Simulation:
         strategy_assignment: StrategyAssignment | None = None,
         drone_speed: int = 2,
         vessel_speed: int = 1,
+        red_detection_range: int = RED_DETECTION_RANGE,
     ) -> None:
         positions = (
             [(mothership.row, mothership.col)]
@@ -96,6 +103,7 @@ class Simulation:
             )
         )
         self._vessel_speed = vessel_speed
+        self._red_detection_range = red_detection_range
         self._infiltration_zone = infiltration_zone_for(mothership.row, grid)
 
         self._turn: int = 0
@@ -176,21 +184,28 @@ class Simulation:
             drone.move(*target)
 
     def move_vessel(self) -> None:
-        """Move RedVessel one step: flees the nearest drone that detected it last turn,
-        or heads toward the infiltration zone if it wasn't detected (baseline behavior).
+        """Move RedVessel one step: flees the nearest threat if it was detected by a
+        drone last turn, or if it senses a drone within its own detection range,
+        otherwise heads toward the infiltration zone (baseline behavior).
 
         Called externally before advance(), matching move_drones()'s pattern. Reacts to
         the most recently computed detections (advance() hasn't run yet this turn).
+        Its own sensing only covers drones, not BlueMothership — the mothership sits
+        at the fixed objective Red is deliberately heading toward, not a reactive threat.
         """
         if self._result is not GameResult.IN_PROGRESS:
             return
 
         position = (self._red_vessel.row, self._red_vessel.col)
-        if self._last_detection_events:
-            threats = [
-                (self._drones[e["drone_idx"]].row, self._drones[e["drone_idx"]].col)
-                for e in self._last_detection_events
-            ]
+        detected = [
+            (self._drones[e["drone_idx"]].row, self._drones[e["drone_idx"]].col)
+            for e in self._last_detection_events
+        ]
+        drone_positions = [(d.row, d.col) for d in self._drones]
+        aware = blue_units_within_range(position, drone_positions, self._red_detection_range)
+        threats = list(dict.fromkeys(detected + aware))
+
+        if threats:
             target = red_evasion_target(
                 position=position, threats=threats, speed=self._vessel_speed, grid=self._grid
             )
