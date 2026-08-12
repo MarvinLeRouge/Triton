@@ -67,6 +67,99 @@ export function drawStrategyLabel(
   ctx.fillText(label, x, y)
 }
 
+export function drawGrid(
+  ctx: CanvasRenderingContext2D,
+  rows: number,
+  cols: number,
+  cellSize: number,
+): void {
+  const width = cols * cellSize
+  const height = rows * cellSize
+  ctx.strokeStyle = '#dde'
+  ctx.lineWidth = 0.5
+  for (let r = 0; r <= rows; r++) {
+    ctx.beginPath()
+    ctx.moveTo(0, r * cellSize)
+    ctx.lineTo(width, r * cellSize)
+    ctx.stroke()
+  }
+  for (let c = 0; c <= cols; c++) {
+    ctx.beginPath()
+    ctx.moveTo(c * cellSize, 0)
+    ctx.lineTo(c * cellSize, height)
+    ctx.stroke()
+  }
+}
+
+export function drawHeatmap(
+  ctx: CanvasRenderingContext2D,
+  map: number[][],
+  cellSize: number,
+): void {
+  let max = 0
+  for (const row of map) {
+    if (!row) continue
+    for (const value of row) {
+      if (value > max) max = value
+    }
+  }
+  for (let r = 0; r < map.length; r++) {
+    const row = map[r]
+    if (!row) continue
+    for (let c = 0; c < row.length; c++) {
+      const intensity = heatmapIntensity(row[c] ?? 0, max)
+      drawHeatmapCell(
+        ctx,
+        cellToPixelX(c, cellSize),
+        cellToPixelY(r, cellSize),
+        cellSize,
+        intensity,
+      )
+    }
+  }
+}
+
+export function drawMothershipMarker(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  cellSize: number,
+  color: string,
+): void {
+  ctx.fillStyle = color
+  ctx.fillRect(x + 1, y + 1, cellSize - 2, cellSize - 2)
+}
+
+export function drawDroneMarker(
+  ctx: CanvasRenderingContext2D,
+  centerX: number,
+  centerY: number,
+  radius: number,
+  color: string,
+): void {
+  ctx.fillStyle = color
+  ctx.beginPath()
+  ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI)
+  ctx.fill()
+}
+
+export function drawVesselMarker(
+  ctx: CanvasRenderingContext2D,
+  centerX: number,
+  topY: number,
+  halfSize: number,
+  cellSize: number,
+  color: string,
+): void {
+  ctx.fillStyle = color
+  ctx.beginPath()
+  ctx.moveTo(centerX, topY + 1)
+  ctx.lineTo(centerX - halfSize + 1, topY + cellSize - 1)
+  ctx.lineTo(centerX + halfSize - 1, topY + cellSize - 1)
+  ctx.closePath()
+  ctx.fill()
+}
+
 export function drawCone(
   ctx: CanvasRenderingContext2D,
   originX: number,

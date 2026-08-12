@@ -14,9 +14,12 @@ import {
   detectionStateColor,
   drawCone,
   drawDetectionRing,
-  drawHeatmapCell,
+  drawDroneMarker,
+  drawGrid,
+  drawHeatmap,
+  drawMothershipMarker,
   drawStrategyLabel,
-  heatmapIntensity,
+  drawVesselMarker,
   strategyLabel,
 } from './canvas-helpers'
 import { useGameStore } from '@/stores/game'
@@ -33,46 +36,6 @@ const canvasRef = ref<HTMLCanvasElement | null>(null)
 const store = useGameStore()
 const flashingDrones = ref(new Set<number>())
 
-function drawGrid(ctx: CanvasRenderingContext2D): void {
-  ctx.strokeStyle = '#dde'
-  ctx.lineWidth = 0.5
-  for (let r = 0; r <= GRID_ROWS; r++) {
-    ctx.beginPath()
-    ctx.moveTo(0, r * CELL_SIZE)
-    ctx.lineTo(CANVAS_W, r * CELL_SIZE)
-    ctx.stroke()
-  }
-  for (let c = 0; c <= GRID_COLS; c++) {
-    ctx.beginPath()
-    ctx.moveTo(c * CELL_SIZE, 0)
-    ctx.lineTo(c * CELL_SIZE, CANVAS_H)
-    ctx.stroke()
-  }
-}
-
-function drawHeatmap(ctx: CanvasRenderingContext2D, map: number[][]): void {
-  let max = 0
-  for (const row of map) {
-    for (const value of row) {
-      if (value > max) max = value
-    }
-  }
-  for (let r = 0; r < map.length; r++) {
-    const row = map[r]
-    if (!row) continue
-    for (let c = 0; c < row.length; c++) {
-      const intensity = heatmapIntensity(row[c] ?? 0, max)
-      drawHeatmapCell(
-        ctx,
-        cellToPixelX(c, CELL_SIZE),
-        cellToPixelY(r, CELL_SIZE),
-        CELL_SIZE,
-        intensity,
-      )
-    }
-  }
-}
-
 function render(): void {
   const canvas = canvasRef.value
   if (!canvas || !store.gameState) return
@@ -85,8 +48,8 @@ function render(): void {
   flashingDrones.value = new Set(detection_events.map((e) => e.drone_idx))
 
   ctx.clearRect(0, 0, CANVAS_W, CANVAS_H)
-  drawHeatmap(ctx, probability_map)
-  drawGrid(ctx)
+  drawHeatmap(ctx, probability_map, CELL_SIZE)
+  drawGrid(ctx, GRID_ROWS, GRID_COLS, CELL_SIZE)
 
   // Cones — rendered behind entities
   for (let i = 0; i < drones.length; i++) {
@@ -106,12 +69,12 @@ function render(): void {
   }
 
   // BlueMothership — filled square (dark blue)
-  ctx.fillStyle = '#0044cc'
-  ctx.fillRect(
-    cellToPixelX(mothership.col, CELL_SIZE) + 1,
-    cellToPixelY(mothership.row, CELL_SIZE) + 1,
-    CELL_SIZE - 2,
-    CELL_SIZE - 2,
+  drawMothershipMarker(
+    ctx,
+    cellToPixelX(mothership.col, CELL_SIZE),
+    cellToPixelY(mothership.row, CELL_SIZE),
+    CELL_SIZE,
+    '#0044cc',
   )
 
   // BlueDrone — circle (light blue), detection-state ring, strategy label
@@ -119,25 +82,20 @@ function render(): void {
     const cx = cellToPixelX(drone.col, CELL_SIZE) + half
     const cy = cellToPixelY(drone.row, CELL_SIZE) + half
 
-    ctx.fillStyle = '#4488ff'
-    ctx.beginPath()
-    ctx.arc(cx, cy, half - 1, 0, 2 * Math.PI)
-    ctx.fill()
-
+    drawDroneMarker(ctx, cx, cy, half - 1, '#4488ff')
     drawDetectionRing(ctx, cx, cy, half + 1, detectionStateColor(drone.detection_state))
     drawStrategyLabel(ctx, cx, cy - half - 2, strategyLabel(drone.strategy))
   }
 
   // RedVessel — triangle (red)
-  ctx.fillStyle = '#cc0000'
-  const vx = cellToPixelX(vessel.col, CELL_SIZE) + half
-  const vy = cellToPixelY(vessel.row, CELL_SIZE)
-  ctx.beginPath()
-  ctx.moveTo(vx, vy + 1)
-  ctx.lineTo(vx - half + 1, vy + CELL_SIZE - 1)
-  ctx.lineTo(vx + half - 1, vy + CELL_SIZE - 1)
-  ctx.closePath()
-  ctx.fill()
+  drawVesselMarker(
+    ctx,
+    cellToPixelX(vessel.col, CELL_SIZE) + half,
+    cellToPixelY(vessel.row, CELL_SIZE),
+    half,
+    CELL_SIZE,
+    '#cc0000',
+  )
 }
 
 onMounted(() => store.connect())
