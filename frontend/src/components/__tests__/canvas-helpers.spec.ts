@@ -6,8 +6,13 @@ import {
   detectionStateColor,
   drawCone,
   drawDetectionRing,
+  drawDroneMarker,
+  drawGrid,
+  drawHeatmap,
   drawHeatmapCell,
+  drawMothershipMarker,
   drawStrategyLabel,
+  drawVesselMarker,
   heatmapIntensity,
   strategyLabel,
 } from '../canvas-helpers'
@@ -67,6 +72,9 @@ class FakeCtx {
   }
   moveTo(_x: number, _y: number): void {
     this.ops.push('moveTo')
+  }
+  lineTo(_x: number, _y: number): void {
+    this.ops.push('lineTo')
   }
   arc(_x: number, _y: number, _r: number, _s: number, _e: number): void {
     this.ops.push('arc')
@@ -246,5 +254,99 @@ describe('drawStrategyLabel', () => {
     const ctx = new FakeCtx()
     drawStrategyLabel(ctx as unknown as CanvasRenderingContext2D, 12, 8, 'GMP')
     expect(ctx.fillTextArgs).toEqual([['GMP', 12, 8]])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// drawGrid
+// ---------------------------------------------------------------------------
+
+describe('drawGrid', () => {
+  it('sets strokeStyle and lineWidth', () => {
+    const ctx = new FakeCtx()
+    drawGrid(ctx as unknown as CanvasRenderingContext2D, 2, 2, 10)
+    expect(ctx.strokeStyle).toBe('#dde')
+    expect(ctx.lineWidth).toBe(0.5)
+  })
+
+  it('strokes (rows+1) horizontal lines and (cols+1) vertical lines', () => {
+    const ctx = new FakeCtx()
+    drawGrid(ctx as unknown as CanvasRenderingContext2D, 2, 3, 10)
+    const strokeCount = ctx.ops.filter((op) => op === 'stroke').length
+    expect(strokeCount).toBe(2 + 1 + (3 + 1))
+  })
+})
+
+// ---------------------------------------------------------------------------
+// drawHeatmap
+// ---------------------------------------------------------------------------
+
+describe('drawHeatmap', () => {
+  it('fills a rect for each cell with positive intensity', () => {
+    const ctx = new FakeCtx()
+    drawHeatmap(
+      ctx as unknown as CanvasRenderingContext2D,
+      [
+        [0, 1],
+        [0.5, 0],
+      ],
+      10,
+    )
+    expect(ctx.fillRectArgs.length).toBe(2)
+  })
+
+  it('draws nothing for an empty map', () => {
+    const ctx = new FakeCtx()
+    drawHeatmap(ctx as unknown as CanvasRenderingContext2D, [], 10)
+    expect(ctx.fillRectArgs.length).toBe(0)
+  })
+
+  it('skips a sparse row without throwing', () => {
+    const ctx = new FakeCtx()
+    const sparseMap: number[][] = [[0, 1]]
+    sparseMap[2] = [0.5, 0] // leaves index 1 as a hole
+    expect(() =>
+      drawHeatmap(ctx as unknown as CanvasRenderingContext2D, sparseMap, 10),
+    ).not.toThrow()
+    expect(ctx.fillRectArgs.length).toBe(2)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// drawMothershipMarker
+// ---------------------------------------------------------------------------
+
+describe('drawMothershipMarker', () => {
+  it('fills a rect inset by 1px within the cell', () => {
+    const ctx = new FakeCtx()
+    drawMothershipMarker(ctx as unknown as CanvasRenderingContext2D, 20, 30, 10, '#0044cc')
+    expect(ctx.fillStyle).toBe('#0044cc')
+    expect(ctx.fillRectArgs).toEqual([[21, 31, 8, 8]])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// drawDroneMarker
+// ---------------------------------------------------------------------------
+
+describe('drawDroneMarker', () => {
+  it('fills a circle at the given center', () => {
+    const ctx = new FakeCtx()
+    drawDroneMarker(ctx as unknown as CanvasRenderingContext2D, 25, 35, 4, '#4488ff')
+    expect(ctx.fillStyle).toBe('#4488ff')
+    expect(ctx.ops).toEqual(['beginPath', 'arc', 'fill'])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// drawVesselMarker
+// ---------------------------------------------------------------------------
+
+describe('drawVesselMarker', () => {
+  it('draws a filled triangle path', () => {
+    const ctx = new FakeCtx()
+    drawVesselMarker(ctx as unknown as CanvasRenderingContext2D, 25, 30, 5, 10, '#cc0000')
+    expect(ctx.fillStyle).toBe('#cc0000')
+    expect(ctx.ops).toEqual(['beginPath', 'moveTo', 'lineTo', 'lineTo', 'closePath', 'fill'])
   })
 })
