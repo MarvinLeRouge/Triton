@@ -81,6 +81,6 @@ uv run uvicorn api.main:app --reload
 - [x] **Phase 2 — Sonar model**: cone-shaped POD, detection probability
 - [x] **Phase 3 — Bayesian map**: probability map, Bayesian update, temporal diffusion
 - [x] **Phase 4 — Drone intelligence**: search strategies, detection state machine
-- [ ] **Phase 5 — Red behavior**: evasion, infiltration objective
+- [x] **Phase 5 — Red behavior**: evasion, infiltration objective
 - [ ] **Phase 6 — Multi-drone coordination**: map fusion, fleet regroup
 - [ ] **Phase 7 — Polish & scenarios**: configuration, replayability, OWASP security audit, design pass, local/remote demo deployment
