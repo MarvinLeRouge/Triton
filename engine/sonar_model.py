@@ -23,6 +23,10 @@ class SonarModel:
         self._max_attention = max_attention
         self._attention_rate = attention_rate
 
+    @property
+    def range_cells(self) -> int:
+        return self._range
+
     def in_cone(
         self,
         drone: tuple[int, int],
