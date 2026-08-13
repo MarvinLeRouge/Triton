@@ -1,6 +1,7 @@
 import random
 
 import numpy as np
+import pytest
 
 from engine.entities import BlueDrone, BlueMothership, RedVessel
 from engine.grid import Grid
@@ -40,6 +41,22 @@ def _make(
         strategy_assignment=strategy_assignment,
     )
     return sim, d1, d2, v
+
+
+# ---------------------------------------------------------------------------
+# Constructor validation
+# ---------------------------------------------------------------------------
+
+
+def test_sync_interval_zero_raises_value_error() -> None:
+    with pytest.raises(ValueError, match="sync_interval"):
+        _make(sync_interval=0)
+
+
+def test_probability_maps_length_mismatch_raises_value_error() -> None:
+    pm = ProbabilityMap(Grid(rows=10, cols=30), spawn_min_dist=100, spawn_max_dist=100)
+    with pytest.raises(ValueError, match="probability_maps"):
+        _make(probability_maps=[pm])  # 1 map, but _make() builds 2 drones
 
 
 # ---------------------------------------------------------------------------
@@ -110,6 +127,24 @@ def test_sync_combines_information_from_all_drones() -> None:
     assert (sim.probability_maps[0].values == sim.probability_maps[1].values).all()
     assert not (sim.probability_maps[0].values == d1_before_sync).all()
     assert not (sim.probability_maps[0].values == d2_before_sync).all()
+
+
+def test_maps_converge_diverge_and_reconverge_across_multiple_sync_cycles() -> None:
+    sim, d1, d2, v = _make(d1_pos=(5, 5), d2_pos=(5, 20), v_pos=(9, 9), sync_interval=3)
+    v.move(5, 5)
+
+    for _ in range(3):
+        sim.advance()
+    assert (sim.probability_maps[0].values == sim.probability_maps[1].values).all()
+    assert abs(float(sim.probability_maps[0].values.sum()) - 1.0) < 1e-9
+
+    for _ in range(2):
+        sim.advance()
+    assert not (sim.probability_maps[0].values == sim.probability_maps[1].values).all()
+
+    sim.advance()  # turn 6: second sync
+    assert (sim.probability_maps[0].values == sim.probability_maps[1].values).all()
+    assert abs(float(sim.probability_maps[0].values.sum()) - 1.0) < 1e-9
 
 
 # ---------------------------------------------------------------------------

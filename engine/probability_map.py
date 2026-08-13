@@ -32,7 +32,7 @@ class ProbabilityMap:
 
     def replace_values(self, values: npt.NDArray[np.float64]) -> None:
         """Replace the map's values wholesale (used when the mothership broadcasts a fused map)."""
-        self._values = values
+        self._values = np.array(values, dtype=np.float64, copy=True)
 
     def update(
         self,

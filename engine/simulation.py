@@ -80,6 +80,10 @@ class Simulation:
         )
         if len(positions) != len(set(positions)):
             raise ValueError("Two or more entities share the same starting cell.")
+        if sync_interval <= 0:
+            raise ValueError("sync_interval must be >= 1.")
+        if probability_maps is not None and len(probability_maps) != len(drones):
+            raise ValueError("probability_maps must have exactly one map per drone.")
 
         self._grid = grid
         self._mothership = mothership
