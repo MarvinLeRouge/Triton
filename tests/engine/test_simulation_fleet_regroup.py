@@ -147,6 +147,26 @@ def test_move_drones_regroup_step_allowed_when_it_respects_min_spacing() -> None
     assert (drones[1].row, drones[1].col) == (5, 13)
 
 
+def test_move_drones_regroup_step_allowed_when_it_lands_exactly_at_min_spacing() -> None:
+    a = _FixedTargetStrategy(target=(5, 5))
+    b = _FixedTargetStrategy(target=(5, 5))
+    fake_rng = _FixedSequenceRandom(randoms=[1.0, 1.0], choices=[a, b])
+    assignment = StrategyAssignment(
+        strategies=[a, b], drone_count=2, switch_probability=0.0, rng=fake_rng
+    )  # type: ignore[arg-type]
+    # drone 1 starts at distance 5 from the anchor; its speed=2 step lands it at distance
+    # 3, exactly equal to min_spacing=3. Landing exactly at min_spacing is allowed (not a
+    # violation) — only landing strictly closer than min_spacing holds the drone in place.
+    sim, drones, _ = _make(
+        positions=[(5, 5), (5, 10)], strategy_assignment=assignment, range_cells=3, drone_speed=2
+    )
+    _confirm(drones[0])
+
+    sim.move_drones()
+
+    assert (drones[1].row, drones[1].col) == (5, 8)
+
+
 # ---------------------------------------------------------------------------
 # Multi-confirmation tie-break
 # ---------------------------------------------------------------------------
