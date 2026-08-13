@@ -221,3 +221,80 @@ def test_move_drones_regroup_stops_once_anchor_no_longer_confirming() -> None:
     # unconditionally (no speed clamping) — drone 1 jumps straight to (5, 19),
     # not a speed-limited step toward it.
     assert (drones[1].row, drones[1].col) == (5, 19)
+
+
+# ---------------------------------------------------------------------------
+# Anchor's real destination is included in spacing checks
+# ---------------------------------------------------------------------------
+
+
+def test_move_drones_anchor_and_regrouping_drone_do_not_collide_when_anchor_moves() -> None:
+    a = _FixedTargetStrategy(target=(5, 6))  # anchor moves onto drone 1's current cell
+    b = _FixedTargetStrategy(target=(5, 5))  # irrelevant, overridden by regroup
+    fake_rng = _FixedSequenceRandom(randoms=[1.0, 1.0], choices=[a, b])
+    assignment = StrategyAssignment(
+        strategies=[a, b], drone_count=2, switch_probability=0.0, rng=fake_rng
+    )  # type: ignore[arg-type]
+    sim, drones, _ = _make(
+        positions=[(5, 5), (5, 6)], strategy_assignment=assignment, range_cells=3, drone_speed=2
+    )
+    _confirm(drones[0])
+
+    sim.move_drones()
+
+    assert (drones[0].row, drones[0].col) != (drones[1].row, drones[1].col)
+    assert (drones[0].row, drones[0].col) == (5, 6)
+    assert (drones[1].row, drones[1].col) == (5, 5)
+
+
+def test_move_drones_holds_position_when_too_close_to_another_regrouping_drone() -> None:
+    a = _FixedTargetStrategy(target=(5, 5))  # anchor stays put
+    b = _FixedTargetStrategy(target=(5, 5))  # irrelevant, overridden by regroup
+    c = _FixedTargetStrategy(target=(5, 5))  # irrelevant, overridden by regroup
+    fake_rng = _FixedSequenceRandom(randoms=[1.0, 1.0, 1.0], choices=[a, b, c])
+    assignment = StrategyAssignment(
+        strategies=[a, b, c], drone_count=3, switch_probability=0.0, rng=fake_rng
+    )  # type: ignore[arg-type]
+    sim, drones, _ = _make(
+        positions=[(5, 5), (5, 15), (5, 16)],
+        strategy_assignment=assignment,
+        range_cells=4,
+        drone_speed=2,
+    )
+    _confirm(drones[0])
+
+    sim.move_drones()
+
+    assert (drones[0].row, drones[0].col) == (5, 5)  # anchor, unaffected
+    assert (drones[1].row, drones[1].col) == (5, 13)  # far from anchor and from drone 2 -> moves
+    assert (drones[2].row, drones[2].col) == (
+        5,
+        16,
+    )  # held: too close to drone 1's newly-claimed (5,13)
+
+
+def test_move_drones_regroup_converges_and_stabilizes_at_min_spacing_over_multiple_turns() -> None:
+    a = _FixedTargetStrategy(target=(5, 5))  # anchor stays put every turn
+    b = _FixedTargetStrategy(target=(5, 5))  # irrelevant, overridden by regroup
+    fake_rng = _FixedSequenceRandom(randoms=[1.0, 1.0] * 6, choices=[a, b])
+    assignment = StrategyAssignment(
+        strategies=[a, b], drone_count=2, switch_probability=0.0, rng=fake_rng
+    )  # type: ignore[arg-type]
+    sim, drones, _ = _make(
+        positions=[(5, 5), (5, 19)], strategy_assignment=assignment, range_cells=4, drone_speed=2
+    )
+    _confirm(drones[0])
+
+    positions_over_time = []
+    for _ in range(6):
+        sim.move_drones()
+        positions_over_time.append((drones[1].row, drones[1].col))
+
+    assert positions_over_time == [
+        (5, 17),
+        (5, 15),
+        (5, 13),
+        (5, 11),
+        (5, 9),
+        (5, 9),  # stabilized: any further step would both close the gap and land under min_spacing
+    ]

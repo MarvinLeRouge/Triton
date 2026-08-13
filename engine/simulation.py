@@ -21,6 +21,10 @@ from engine.sonar_model import SonarModel
 from engine.strategy_assignment import StrategyAssignment
 
 
+def _chebyshev(a: tuple[int, int], b: tuple[int, int]) -> int:
+    return max(abs(a[0] - b[0]), abs(a[1] - b[1]))
+
+
 class GameResult(StrEnum):
     IN_PROGRESS = "in_progress"
     BLUE_WINS = "blue_wins"
@@ -168,9 +172,22 @@ class Simulation:
         """Move each drone according to its currently assigned search strategy —
         unless a drone has confirmed a detection (CONFIRMING or TRACKING), in which
         case every other drone abandons its assigned strategy and regroups toward
-        that drone instead, holding position rather than closing to less than
-        SonarModel.range_cells from another blue unit. Regrouping stops the instant
-        the anchor drone drops back below CONFIRMING.
+        that drone instead. Regrouping stops the instant the anchor drone drops
+        back below CONFIRMING.
+
+        The anchor drone still moves via its own assigned strategy, and its
+        actual computed destination this turn (not its pre-move position) is
+        what other drones treat as occupied when checking spacing, so no
+        drone can walk onto the cell the anchor is actually moving into.
+
+        Spacing is enforced against SonarModel.range_cells (floored at 1), but
+        a regrouping step is only held back when it would BOTH still land
+        under min_spacing of some other drone's cell AND actually get closer
+        to that cell than the drone already was. This means a drone that
+        starts the regroup already inside min_spacing keeps the freedom to
+        move, as long as it doesn't close the gap further — so the fleet
+        converges turn by turn toward roughly min_spacing apart and then
+        stabilizes there, instead of freezing in place for the whole regroup.
 
         Called externally before advance(), matching notify_vessel_moved()'s
         pattern: Simulation evaluates state but never moves entities on its
@@ -198,29 +215,31 @@ class Simulation:
         if confirming_idx is not None:
             confirming_drone = self._drones[confirming_idx]
             confirming_pos = (confirming_drone.row, confirming_drone.col)
-            min_spacing = self._sonar.range_cells
-            occupied: set[tuple[int, int]] = {confirming_pos}
+            anchor_target = self._strategy_assignment.strategy_for(confirming_idx).next_target(
+                position=confirming_pos,
+                speed=self._drone_speed,
+                grid=self._grid,
+                probability_map=self._probability_maps[confirming_idx],
+            )
+            min_spacing = max(1, self._sonar.range_cells)
+            occupied: set[tuple[int, int]] = {anchor_target}
             for i, drone in enumerate(self._drones):
                 if i == confirming_idx:
-                    strategy = self._strategy_assignment.strategy_for(i)
-                    target = strategy.next_target(
-                        position=(drone.row, drone.col),
-                        speed=self._drone_speed,
-                        grid=self._grid,
-                        probability_map=self._probability_maps[i],
-                    )
+                    target = anchor_target
                 else:
+                    position = (drone.row, drone.col)
                     candidate = regroup_target(
-                        position=(drone.row, drone.col),
+                        position=position,
                         target=confirming_pos,
                         speed=self._drone_speed,
                         grid=self._grid,
                     )
                     too_close = any(
-                        max(abs(candidate[0] - p[0]), abs(candidate[1] - p[1])) < min_spacing
+                        _chebyshev(candidate, p) < min_spacing
+                        and _chebyshev(candidate, p) < _chebyshev(position, p)
                         for p in occupied
                     )
-                    target = (drone.row, drone.col) if too_close else candidate
+                    target = position if too_close else candidate
                     occupied.add(target)
                 drone.move(*target)
             return
