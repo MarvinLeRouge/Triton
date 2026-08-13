@@ -30,6 +30,10 @@ class ProbabilityMap:
         """Return the probability mass at (row, col)."""
         return float(self._values[row, col])
 
+    def replace_values(self, values: npt.NDArray[np.float64]) -> None:
+        """Replace the map's values wholesale (used when the mothership broadcasts a fused map)."""
+        self._values = values
+
     def update(
         self,
         sonar: SonarModel,
