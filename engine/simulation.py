@@ -71,6 +71,7 @@ class Simulation:
         drone_speed: int = 2,
         vessel_speed: int = 1,
         red_detection_range: int = RED_DETECTION_RANGE,
+        sync_interval: int = 10,
     ) -> None:
         positions = (
             [(mothership.row, mothership.col)]
@@ -108,6 +109,7 @@ class Simulation:
         self._vessel_speed = vessel_speed
         self._red_detection_range = red_detection_range
         self._infiltration_zone = infiltration_zone_for(mothership.row, grid)
+        self._sync_interval = sync_interval
 
         self._turn: int = 0
         self._detection_streak: int = 0
@@ -230,6 +232,10 @@ class Simulation:
         self._last_detection_events = self._compute_detections()
         for probability_map in self._probability_maps:
             probability_map.diffuse()
+        if self._turn % self._sync_interval == 0:
+            fused = fuse_maps(self._probability_maps)
+            for probability_map in self._probability_maps:
+                probability_map.replace_values(fused)
         detected = len(self._last_detection_events) > 0
         in_range = self._in_mothership_range()
 
