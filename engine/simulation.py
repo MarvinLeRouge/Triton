@@ -4,7 +4,8 @@ import random
 from enum import StrEnum
 from typing import Any
 
-from engine.entities import BlueDrone, BlueMothership, RedVessel
+from engine.entities import BlueDrone, BlueMothership, DetectionState, RedVessel
+from engine.fleet_regroup import regroup_target
 from engine.grid import Grid
 from engine.map_fusion import fuse_maps
 from engine.probability_map import ProbabilityMap
@@ -164,7 +165,12 @@ class Simulation:
         self._vessel_moved = moved
 
     def move_drones(self) -> None:
-        """Move each drone according to its currently assigned search strategy.
+        """Move each drone according to its currently assigned search strategy —
+        unless a drone has confirmed a detection (CONFIRMING or TRACKING), in which
+        case every other drone abandons its assigned strategy and regroups toward
+        that drone instead, holding position rather than closing to less than
+        SonarModel.range_cells from another blue unit. Regrouping stops the instant
+        the anchor drone drops back below CONFIRMING.
 
         Called externally before advance(), matching notify_vessel_moved()'s
         pattern: Simulation evaluates state but never moves entities on its
@@ -172,12 +178,53 @@ class Simulation:
 
         Drones claim distinct cells within the same turn: if a drone's computed
         target is already claimed by an earlier drone this turn, it stays in
-        place instead of stacking on top of it.
+        place instead of stacking on top of it. This applies to the non-regroup
+        path only — the regroup path enforces its own minimum-spacing rule instead.
         """
         if self._result is not GameResult.IN_PROGRESS:
             return
 
         self._strategy_assignment.advance()
+
+        confirming_idx = next(
+            (
+                i
+                for i, d in enumerate(self._drones)
+                if d.detection_state in (DetectionState.CONFIRMING, DetectionState.TRACKING)
+            ),
+            None,
+        )
+
+        if confirming_idx is not None:
+            confirming_drone = self._drones[confirming_idx]
+            confirming_pos = (confirming_drone.row, confirming_drone.col)
+            min_spacing = self._sonar.range_cells
+            occupied: set[tuple[int, int]] = {confirming_pos}
+            for i, drone in enumerate(self._drones):
+                if i == confirming_idx:
+                    strategy = self._strategy_assignment.strategy_for(i)
+                    target = strategy.next_target(
+                        position=(drone.row, drone.col),
+                        speed=self._drone_speed,
+                        grid=self._grid,
+                        probability_map=self._probability_maps[i],
+                    )
+                else:
+                    candidate = regroup_target(
+                        position=(drone.row, drone.col),
+                        target=confirming_pos,
+                        speed=self._drone_speed,
+                        grid=self._grid,
+                    )
+                    too_close = any(
+                        max(abs(candidate[0] - p[0]), abs(candidate[1] - p[1])) < min_spacing
+                        for p in occupied
+                    )
+                    target = (drone.row, drone.col) if too_close else candidate
+                    occupied.add(target)
+                drone.move(*target)
+            return
+
         claimed: set[tuple[int, int]] = set()
         for i, drone in enumerate(self._drones):
             strategy = self._strategy_assignment.strategy_for(i)
