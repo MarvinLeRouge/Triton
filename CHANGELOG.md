@@ -10,6 +10,27 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [0.6.0] — 2026-08-13 — Phase 6: Multi-Drone Coordination
+
+### Added
+
+**Engine**
+- Per-drone `ProbabilityMap` — each `BlueDrone` now maintains its own independent probability map, updated only by its own sonar sweeps, replacing the single map previously shared by the whole fleet (deliberate breaking API rename: `Simulation.probability_map` → `probability_maps`, no compatibility shim)
+- `fuse_maps()` (`engine/map_fusion.py`) — pure elementwise-mean + renormalization of multiple drones' maps into one consensus view
+- `ProbabilityMap.replace_values()` — wholesale replacement of a map's values, used when the mothership broadcasts a fused map
+- `Simulation.advance()` — every `sync_interval` turns (default 10), fuses all drones' maps and redistributes the result to the whole fleet; `to_dict()`'s `"probability_map"` JSON key is unchanged, now computed live via `fuse_maps()` (no frontend changes required)
+- `regroup_target()` (`engine/fleet_regroup.py`) — pure speed-bounded step toward a fixed target, mirrors `red_baseline_target`'s movement math
+- `SonarModel.range_cells` — exposed publicly, used as the minimum spacing distance during fleet regroup
+- `Simulation.move_drones()` — as soon as the lowest-index drone reaches `CONFIRMING`/`TRACKING`, every other drone abandons its assigned search strategy and converges toward that drone instead, holding position rather than closing to less than `SonarModel.range_cells` from another blue unit (the spacing rule only rejects further closing, not existing proximity, so drones converge progressively and stabilize rather than freezing); regrouping ends the instant the anchor drops back below `CONFIRMING`
+
+### Fixed
+
+- `ProbabilityMap.replace_values()` copies its input instead of aliasing it — previously, all drones' maps could end up sharing one underlying array right after a sync
+- `Simulation` constructor now validates `sync_interval >= 1` and that `probability_maps` (when provided) has exactly one map per drone, raising `ValueError` at construction instead of failing later or silently
+- `Simulation.move_drones()`'s fleet-regroup minimum-spacing check now uses the anchor drone's actual computed destination this turn, not its pre-move position — previously the anchor could end up on the same cell as a drone that had just held position specifically to avoid it
+
+---
+
 ## [0.5.0] — 2026-08-11 — Phase 5: Red Behavior
 
 ### Added

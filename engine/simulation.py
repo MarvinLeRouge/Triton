@@ -4,8 +4,10 @@ import random
 from enum import StrEnum
 from typing import Any
 
-from engine.entities import BlueDrone, BlueMothership, RedVessel
+from engine.entities import BlueDrone, BlueMothership, DetectionState, RedVessel
+from engine.fleet_regroup import regroup_target
 from engine.grid import Grid
+from engine.map_fusion import fuse_maps
 from engine.probability_map import ProbabilityMap
 from engine.red_behavior import (
     RED_DETECTION_RANGE,
@@ -17,6 +19,10 @@ from engine.red_behavior import (
 from engine.search_strategy import FrontierCoverage, GreedyMaxProbability
 from engine.sonar_model import SonarModel
 from engine.strategy_assignment import StrategyAssignment
+
+
+def _chebyshev(a: tuple[int, int], b: tuple[int, int]) -> int:
+    return max(abs(a[0] - b[0]), abs(a[1] - b[1]))
 
 
 class GameResult(StrEnum):
@@ -65,11 +71,12 @@ class Simulation:
         engagement_turns: int = 2,
         rng: random.Random | None = None,
         sonar: SonarModel | None = None,
-        probability_map: ProbabilityMap | None = None,
+        probability_maps: list[ProbabilityMap] | None = None,
         strategy_assignment: StrategyAssignment | None = None,
         drone_speed: int = 2,
         vessel_speed: int = 1,
         red_detection_range: int = RED_DETECTION_RANGE,
+        sync_interval: int = 10,
     ) -> None:
         positions = (
             [(mothership.row, mothership.col)]
@@ -78,6 +85,10 @@ class Simulation:
         )
         if len(positions) != len(set(positions)):
             raise ValueError("Two or more entities share the same starting cell.")
+        if sync_interval <= 0:
+            raise ValueError("sync_interval must be >= 1.")
+        if probability_maps is not None and len(probability_maps) != len(drones):
+            raise ValueError("probability_maps must have exactly one map per drone.")
 
         self._grid = grid
         self._mothership = mothership
@@ -89,8 +100,10 @@ class Simulation:
         self._engagement_turns = engagement_turns
         self._rng = rng if rng is not None else random.Random()
         self._sonar = sonar if sonar is not None else SonarModel()
-        self._probability_map = (
-            probability_map if probability_map is not None else ProbabilityMap(grid)
+        self._probability_maps = (
+            probability_maps
+            if probability_maps is not None
+            else [ProbabilityMap(grid) for _ in drones]
         )
         self._drone_speed = drone_speed
         self._strategy_assignment = (
@@ -105,6 +118,7 @@ class Simulation:
         self._vessel_speed = vessel_speed
         self._red_detection_range = red_detection_range
         self._infiltration_zone = infiltration_zone_for(mothership.row, grid)
+        self._sync_interval = sync_interval
 
         self._turn: int = 0
         self._detection_streak: int = 0
@@ -128,7 +142,7 @@ class Simulation:
                 detection_streak=self._detection_streak,
                 rng=self._rng,
             )
-            self._probability_map.update(
+            self._probability_maps[i].update(
                 sonar=self._sonar,
                 drone=(drone.row, drone.col),
                 heading=drone.heading,
@@ -155,7 +169,25 @@ class Simulation:
         self._vessel_moved = moved
 
     def move_drones(self) -> None:
-        """Move each drone according to its currently assigned search strategy.
+        """Move each drone according to its currently assigned search strategy —
+        unless a drone has confirmed a detection (CONFIRMING or TRACKING), in which
+        case every other drone abandons its assigned strategy and regroups toward
+        that drone instead. Regrouping stops the instant the anchor drone drops
+        back below CONFIRMING.
+
+        The anchor drone still moves via its own assigned strategy, and its
+        actual computed destination this turn (not its pre-move position) is
+        what other drones treat as occupied when checking spacing, so no
+        drone can walk onto the cell the anchor is actually moving into.
+
+        Spacing is enforced against SonarModel.range_cells (floored at 1), but
+        a regrouping step is only held back when it would BOTH still land
+        under min_spacing of some other drone's cell AND actually get closer
+        to that cell than the drone already was. This means a drone that
+        starts the regroup already inside min_spacing keeps the freedom to
+        move, as long as it doesn't close the gap further — so the fleet
+        converges turn by turn toward roughly min_spacing apart and then
+        stabilizes there, instead of freezing in place for the whole regroup.
 
         Called externally before advance(), matching notify_vessel_moved()'s
         pattern: Simulation evaluates state but never moves entities on its
@@ -163,12 +195,55 @@ class Simulation:
 
         Drones claim distinct cells within the same turn: if a drone's computed
         target is already claimed by an earlier drone this turn, it stays in
-        place instead of stacking on top of it.
+        place instead of stacking on top of it. This applies to the non-regroup
+        path only — the regroup path enforces its own minimum-spacing rule instead.
         """
         if self._result is not GameResult.IN_PROGRESS:
             return
 
         self._strategy_assignment.advance()
+
+        confirming_idx = next(
+            (
+                i
+                for i, d in enumerate(self._drones)
+                if d.detection_state in (DetectionState.CONFIRMING, DetectionState.TRACKING)
+            ),
+            None,
+        )
+
+        if confirming_idx is not None:
+            confirming_drone = self._drones[confirming_idx]
+            confirming_pos = (confirming_drone.row, confirming_drone.col)
+            anchor_target = self._strategy_assignment.strategy_for(confirming_idx).next_target(
+                position=confirming_pos,
+                speed=self._drone_speed,
+                grid=self._grid,
+                probability_map=self._probability_maps[confirming_idx],
+            )
+            min_spacing = max(1, self._sonar.range_cells)
+            occupied: set[tuple[int, int]] = {anchor_target}
+            for i, drone in enumerate(self._drones):
+                if i == confirming_idx:
+                    target = anchor_target
+                else:
+                    position = (drone.row, drone.col)
+                    candidate = regroup_target(
+                        position=position,
+                        target=confirming_pos,
+                        speed=self._drone_speed,
+                        grid=self._grid,
+                    )
+                    too_close = any(
+                        _chebyshev(candidate, p) < min_spacing
+                        and _chebyshev(candidate, p) < _chebyshev(position, p)
+                        for p in occupied
+                    )
+                    target = position if too_close else candidate
+                    occupied.add(target)
+                drone.move(*target)
+            return
+
         claimed: set[tuple[int, int]] = set()
         for i, drone in enumerate(self._drones):
             strategy = self._strategy_assignment.strategy_for(i)
@@ -176,7 +251,7 @@ class Simulation:
                 position=(drone.row, drone.col),
                 speed=self._drone_speed,
                 grid=self._grid,
-                probability_map=self._probability_map,
+                probability_map=self._probability_maps[i],
             )
             if target in claimed:
                 target = (drone.row, drone.col)
@@ -225,7 +300,12 @@ class Simulation:
 
         self._turn += 1
         self._last_detection_events = self._compute_detections()
-        self._probability_map.diffuse()
+        for probability_map in self._probability_maps:
+            probability_map.diffuse()
+        if self._turn % self._sync_interval == 0:
+            fused = fuse_maps(self._probability_maps)
+            for probability_map in self._probability_maps:
+                probability_map.replace_values(fused)
         detected = len(self._last_detection_events) > 0
         in_range = self._in_mothership_range()
 
@@ -277,8 +357,8 @@ class Simulation:
         return self._red_vessel
 
     @property
-    def probability_map(self) -> ProbabilityMap:
-        return self._probability_map
+    def probability_maps(self) -> list[ProbabilityMap]:
+        return self._probability_maps
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize the current game state to a JSON-compatible dict."""
@@ -298,5 +378,5 @@ class Simulation:
             ],
             "vessel": {"row": self._red_vessel.row, "col": self._red_vessel.col},
             "detection_events": self._last_detection_events,
-            "probability_map": self._probability_map.values.round(4).tolist(),
+            "probability_map": fuse_maps(self._probability_maps).round(4).tolist(),
         }

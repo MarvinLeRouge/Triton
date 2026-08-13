@@ -31,7 +31,7 @@ def _make(
     d_pos: tuple[int, int] = (5, 5),
     v_pos: tuple[int, int] = (9, 9),
     strategy_assignment: StrategyAssignment | None = None,
-    probability_map: ProbabilityMap | None = None,
+    probability_maps: list[ProbabilityMap] | None = None,
     drone_speed: int = 2,
 ) -> tuple[Simulation, BlueDrone, RedVessel]:
     g = Grid(rows=10, cols=30)
@@ -46,7 +46,7 @@ def _make(
         rng=random.Random(42),
         sonar=SonarModel(range_cells=0),
         strategy_assignment=strategy_assignment,
-        probability_map=probability_map,
+        probability_maps=probability_maps,
         drone_speed=drone_speed,
     )
     return sim, d, v
@@ -95,7 +95,7 @@ def test_move_drones_uses_probability_map_and_drone_speed() -> None:
         rng=random.Random(0),
     )
     sim, d, _ = _make(
-        d_pos=(5, 5), strategy_assignment=assignment, probability_map=pm, drone_speed=2
+        d_pos=(5, 5), strategy_assignment=assignment, probability_maps=[pm], drone_speed=2
     )
 
     sim.move_drones()

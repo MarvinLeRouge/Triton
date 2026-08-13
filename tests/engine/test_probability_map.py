@@ -1,3 +1,5 @@
+import numpy as np
+
 from engine.grid import Grid
 from engine.probability_map import ProbabilityMap
 
@@ -67,3 +69,27 @@ def test_east_spawn_band_has_higher_probability_than_west_zone() -> None:
 def test_band_cells_have_uniform_probability() -> None:
     pm = _pm()
     assert pm.probability(3, 5) == pm.probability(6, 15)
+
+
+def test_replace_values_updates_the_map() -> None:
+    pm = _pm()
+    new_values = pm.values.copy()
+    new_values[0, 0] = 0.9
+    pm.replace_values(new_values)
+    assert pm.probability(0, 0) == 0.9
+
+
+def test_replace_values_reflected_in_values_property() -> None:
+    pm = _pm()
+    new_values = pm.values.copy()
+    new_values[3, 4] = 0.5
+    pm.replace_values(new_values)
+    assert pm.values[3, 4] == 0.5
+
+
+def test_replace_values_does_not_alias_the_input_array() -> None:
+    pm = _pm()
+    shared = np.zeros((pm.values.shape[0], pm.values.shape[1]))
+    pm.replace_values(shared)
+    shared[0, 0] = 42.0
+    assert pm.values[0, 0] != 42.0
