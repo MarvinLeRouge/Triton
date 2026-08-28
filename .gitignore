@@ -219,3 +219,8 @@ __marimo__/
 
 # AI
 docs/ai
+
+# Tooling output
+.serena
+graphify-out
+.husky
