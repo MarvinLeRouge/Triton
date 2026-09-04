@@ -1,0 +1,51 @@
+# git-cliff configuration file
+# https://git-cliff.org/docs/configuration
+#
+# Maintains only the "Unreleased" section of CHANGELOG.md automatically (see
+# .github/workflows/changelog.yml). Entries before v0.6.0 are hand-written
+# history and are never touched by this config; do not run git-cliff without
+# --unreleased and the strip-then-prepend workflow, or it will regenerate the
+# whole file from scratch.
+
+[changelog]
+header = """
+# Changelog\n
+All notable changes to this project will be documented in this file.
+Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).\n
+"""
+body = """
+{% if version -%}
+## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}{% if tag_message %} - {{ tag_message }}{% endif %}
+{% else -%}
+## [Unreleased]
+{% endif -%}
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | upper_first }}
+{% for commit in commits %}
+- {{ commit.message | split(pat="\n") | first | upper_first | trim }}
+{% endfor %}
+{% endfor %}
+"""
+footer = ""
+trim = true
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+split_commits = false
+commit_parsers = [
+    { message = "^feat", group = "Added" },
+    { message = "^fix", group = "Fixed" },
+    { message = "^refactor", group = "Changed" },
+    { message = "^perf", group = "Changed" },
+    { message = "^revert", group = "Changed" },
+    { message = "^docs", skip = true },
+    { message = "^chore", skip = true },
+    { message = "^ci", skip = true },
+    { message = "^test", skip = true },
+    { message = "^style", skip = true },
+]
+filter_commits = true
+topo_order = false
+sort_commits = "oldest"
