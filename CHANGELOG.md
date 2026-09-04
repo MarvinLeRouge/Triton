@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
 Entries from `v0.6.0` onward, including `[Unreleased]`, are generated
 automatically by [git-cliff](https://git-cliff.org/) from Conventional Commits
 history (see `cliff.toml` and `.github/workflows/changelog.yml`); do not
