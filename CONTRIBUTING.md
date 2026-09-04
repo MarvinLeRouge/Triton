@@ -99,6 +99,23 @@ npm run type-check         # vue-tsc
 
 CI will reject any pull request that fails these checks.
 
+## Releases and changelog
+
+The `[Unreleased]` section of `CHANGELOG.md` is maintained automatically: a CI
+workflow (`.github/workflows/changelog.yml`, config in `cliff.toml`) runs
+[git-cliff](https://git-cliff.org/) on every push to `main` and opens or
+updates a pull request with the regenerated section. Never hand-edit
+`CHANGELOG.md`'s `[Unreleased]` section or anything above it; entries before
+`v0.6.0` are frozen hand-written history.
+
+To cut an actual release, once `main` reflects the state you want to ship:
+
+1. Create an annotated tag: `git tag -a vX.Y.Z -m "Phase N: Title"`.
+2. Push it: `git push origin vX.Y.Z`.
+3. Locally, regenerate the changelog with the new version title:
+   `npx git-cliff --config cliff.toml --tag vX.Y.Z --prepend CHANGELOG.md`
+   (after removing any stale `[Unreleased]` block), then commit the result.
+
 ## Code of Conduct
 
 This project follows a [Code of Conduct](CODE_OF_CONDUCT.md). By participating,

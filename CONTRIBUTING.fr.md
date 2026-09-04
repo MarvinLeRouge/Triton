@@ -99,6 +99,26 @@ npm run type-check         # vue-tsc
 
 La CI rejettera toute pull request qui ne passe pas ces vérifications.
 
+## Releases et changelog
+
+La section `[Unreleased]` de `CHANGELOG.md` est maintenue automatiquement :
+un workflow CI (`.github/workflows/changelog.yml`, config dans `cliff.toml`)
+exécute [git-cliff](https://git-cliff.org/) à chaque push sur `main` et
+ouvre ou met à jour une pull request avec la section régénérée. Ne jamais
+modifier à la main la section `[Unreleased]` de `CHANGELOG.md` ni ce qui
+est au-dessus ; les entrées antérieures à `v0.6.0` sont un historique
+rédigé à la main, figé.
+
+Pour sortir une vraie release, une fois que `main` reflète l'état à
+publier :
+
+1. Créer un tag annoté : `git tag -a vX.Y.Z -m "Phase N: Titre"`.
+2. Le pousser : `git push origin vX.Y.Z`.
+3. Régénérer localement le changelog avec le titre de version :
+   `npx git-cliff --config cliff.toml --tag vX.Y.Z --prepend CHANGELOG.md`
+   (après avoir retiré tout bloc `[Unreleased]` obsolète), puis commiter
+   le résultat.
+
 ## Code de conduite
 
 Ce projet suit un [Code de conduite](CODE_OF_CONDUCT.fr.md). En participant,
