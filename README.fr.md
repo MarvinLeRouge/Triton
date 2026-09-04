@@ -51,7 +51,7 @@ npm run type-check         # TypeScript
 
 ### Stack complète via Docker + Traefik (recommandé)
 
-Suivre `docs/ai/dev-local-traefik.md` pour le setup Traefik local (one-time), puis :
+Suivre [docs/operations.fr.md](docs/operations.fr.md) pour le setup Traefik local (one-time), puis :
 
 ```bash
 # Ajouter dans /etc/hosts : 127.0.0.1 triton.marvinlerouge.local
@@ -71,16 +71,19 @@ uv run uvicorn api.main:app --reload
 
 ## 🗺️ Feuille de route
 
-### ✅ Planification
+Les phases 1 à 6 sont terminées (fondations, modèle sonar, carte bayésienne,
+intelligence des drones, comportement Red, coordination multi-drones). La
+Phase 7 (finalisation & scénarios) est en cours. Voir
+[docs/roadmap.fr.md](docs/roadmap.fr.md) pour le détail phase par phase.
 
-- [x] Cadrage du projet & planification par phases — architecture, conventions de nommage (factions Blue/Red), paramètres par défaut de la simulation, outillage (uv, ruff, mypy, ESLint, Prettier, Vitest, Codecov)
+## 📚 Documentation
 
-### 🔜 Prévu
-
-- [x] **Phase 1 — Fondations** : grille, entités, placement initial, pipeline complet (engine, API, frontend, Docker/Traefik)
-- [x] **Phase 2 — Modèle sonar** : cône de détection (POD), probabilité de détection
-- [x] **Phase 3 — Carte bayésienne** : carte de probabilité, mise à jour bayésienne, diffusion temporelle
-- [x] **Phase 4 — Intelligence des drones** : stratégies de recherche, machine à états de détection
-- [x] **Phase 5 — Comportement Red** : évasion, objectif d'infiltration
-- [x] **Phase 6 — Coordination multi-drones** : fusion de cartes, regroupement de la flotte
-- [ ] **Phase 7 — Finalisation & scénarios** : configuration, rejouabilité, audit sécurité OWASP, passe design, déploiement de démo local/distant, documentation des choix de conception
+- [Feuille de route](docs/roadmap.fr.md)
+- [Contexte produit](docs/product-context.fr.md)
+- [Opérations / déploiement](docs/operations.fr.md)
+- [Système de design](docs/design-system.fr.md)
+- [Architecture](docs/architecture/)
+- [Guide joueur](docs/guides/user_guide.fr.md)
+- [Guide développeur](docs/guides/developer_guide.fr.md)
+- [Registre des décisions d'architecture](docs/adr/)
+- [Contribuer](CONTRIBUTING.fr.md)
