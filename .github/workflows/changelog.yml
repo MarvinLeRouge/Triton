@@ -27,8 +27,13 @@ jobs:
         with:
           node-version: "20"
 
+      # Only the "Unreleased" section is regenerated: tagged version sections
+      # are frozen history and must never be rewritten by this workflow.
       - name: Regenerate changelog
-        run: npx --yes git-cliff@2.13.1 --config cliff.toml --output CHANGELOG.md
+        run: |
+          awk '/^## \[[0-9]/{print; found=1; next} found' CHANGELOG.md > /tmp/changelog_frozen.md
+          npx --yes git-cliff@2.13.1 --config cliff.toml --unreleased --output /tmp/changelog_unreleased.md
+          cat /tmp/changelog_unreleased.md /tmp/changelog_frozen.md > CHANGELOG.md
 
       # main is protected: no direct push, so open a PR instead of committing
       # straight to it. Reuses the same branch across runs, updating the
