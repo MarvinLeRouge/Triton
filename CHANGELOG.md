@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Miscellaneous
+
+- Remove stale generic Vite boilerplate README
+
+- Add automated changelog generation via git-cliff
+
+- Homogenize changelog workflow
+
+- Standardize AI working notes folder to docs/work-in-progress
+
+- Add issue and pull request templates
+
+- Stop dropping chore/ci commits and freeze tagged history
+
+
 ## [0.6.0] - 2026-08-13
 
 ### Added
