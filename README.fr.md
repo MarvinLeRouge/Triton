@@ -82,7 +82,7 @@ Phase 7 (finalisation & scénarios) est en cours. Voir
 - [Contexte produit](docs/product-context.fr.md)
 - [Opérations / déploiement](docs/operations.fr.md)
 - [Système de design](docs/design-system.fr.md)
-- [Architecture](docs/architecture/)
+- [Architecture](docs/architecture.fr.md)
 - [Guide joueur](docs/guides/user_guide.fr.md)
 - [Guide développeur](docs/guides/developer_guide.fr.md)
 - [Registre des décisions d'architecture](docs/adr/)

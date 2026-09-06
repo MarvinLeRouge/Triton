@@ -82,7 +82,7 @@ full phase-by-phase breakdown.
 - [Product context](docs/product-context.md)
 - [Operations / deployment](docs/operations.md)
 - [Design system](docs/design-system.md)
-- [Architecture](docs/architecture/)
+- [Architecture](docs/architecture.md)
 - [Player guide](docs/guides/user_guide.md)
 - [Developer guide](docs/guides/developer_guide.md)
 - [Architecture Decision Records](docs/adr/)
