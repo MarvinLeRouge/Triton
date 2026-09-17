@@ -32,6 +32,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Make Codecov thresholds blocking
 
+- Add ci-status aggregator job
+
 
 ## [0.6.0] - 2026-08-13
 
