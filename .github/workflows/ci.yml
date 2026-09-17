@@ -6,7 +6,13 @@ on:
       - main
       - develop
       - "phase-**"
+    paths-ignore:
+      - "docs/**"
+      - "**.md"
   pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "**.md"
 
 jobs:
   changes:
