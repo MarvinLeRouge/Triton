@@ -22,6 +22,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Add path-filter to skip backend/frontend jobs on unrelated changes
 
+- Skip CI on doc-only changes
+
+- Make Codecov upload non-blocking on failure
+
+- Bump codecov-action to v7
+
+- Align frontend coverage report with the rest of the fleet
+
 
 ## [0.6.0] - 2026-08-13
 
