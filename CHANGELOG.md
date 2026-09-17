@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- Trigger workflow on all pull requests, not just non-doc changes
+
+
 ### Miscellaneous
 
 - Remove stale generic Vite boilerplate README
