@@ -76,6 +76,7 @@ jobs:
           use_oidc: true
           flags: backend
           files: coverage.xml
+          fail_ci_if_error: false
 
   frontend:
     needs: changes
@@ -117,3 +118,4 @@ jobs:
           use_oidc: true
           flags: frontend
           directory: frontend/coverage
+          fail_ci_if_error: false
