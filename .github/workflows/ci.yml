@@ -71,11 +71,12 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: hashFiles('coverage.xml') != ''
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           use_oidc: true
           flags: backend
           files: coverage.xml
+          fail_ci_if_error: false
 
   frontend:
     needs: changes
@@ -111,9 +112,10 @@ jobs:
         run: npm run test:coverage -- --passWithNoTests
 
       - name: Upload coverage to Codecov
-        if: hashFiles('frontend/coverage/coverage-final.json') != ''
-        uses: codecov/codecov-action@v5
+        if: hashFiles('frontend/coverage/lcov.info') != ''
+        uses: codecov/codecov-action@v7
         with:
           use_oidc: true
           flags: frontend
-          directory: frontend/coverage
+          files: frontend/coverage/lcov.info
+          fail_ci_if_error: false
