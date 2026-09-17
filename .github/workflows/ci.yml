@@ -112,10 +112,10 @@ jobs:
         run: npm run test:coverage -- --passWithNoTests
 
       - name: Upload coverage to Codecov
-        if: hashFiles('frontend/coverage/coverage-final.json') != ''
+        if: hashFiles('frontend/coverage/lcov.info') != ''
         uses: codecov/codecov-action@v7
         with:
           use_oidc: true
           flags: frontend
-          directory: frontend/coverage
+          files: frontend/coverage/lcov.info
           fail_ci_if_error: false

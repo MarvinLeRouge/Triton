@@ -12,6 +12,7 @@ export default mergeConfig(
       setupFiles: ['./vitest.setup.ts'],
       coverage: {
         provider: 'v8',
+        reporter: ['text', 'lcov'],
         include: ['src/**/*.{ts,vue}'],
         exclude: ['src/main.ts'],
       },
