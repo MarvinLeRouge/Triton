@@ -30,6 +30,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Align frontend coverage report with the rest of the fleet
 
+- Make Codecov thresholds blocking
+
 
 ## [0.6.0] - 2026-08-13
 
