@@ -29,6 +29,8 @@ uv run pytest              # backend
 cd frontend && npm run test:unit   # frontend
 ```
 
+Coverage thresholds (`codecov.yml`, blocking): project 80% (±2%), patch 90% (±5%, backend and frontend).
+
 ## Workflow
 
 1. Fork the repository and create a branch off `develop` (not `main`, which is

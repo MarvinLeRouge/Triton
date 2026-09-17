@@ -30,6 +30,8 @@ uv run pytest              # backend
 cd frontend && npm run test:unit   # frontend
 ```
 
+Seuils de couverture (`codecov.yml`, bloquants) : projet 80 % (±2 %), patch 90 % (±5 %, backend et frontend).
+
 ## Déroulement
 
 1. Forker le dépôt et créer une branche à partir de `develop` (pas `main`, qui
