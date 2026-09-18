@@ -3,6 +3,15 @@
 ---
 
 # Triton
+
+[![CI](https://github.com/MarvinLeRouge/Triton/actions/workflows/ci.yml/badge.svg)](https://github.com/MarvinLeRouge/Triton/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/Python-3.13+-3776AB?logo=python&logoColor=white)
+![Vue.js](https://img.shields.io/badge/Vue.js-3-4FC08D?logo=vuedotjs&logoColor=white)
+[![Backend coverage](https://img.shields.io/codecov/c/github/MarvinLeRouge/Triton?flag=backend&label=backend&logo=codecov)](https://app.codecov.io/gh/MarvinLeRouge/Triton)
+[![Frontend coverage](https://img.shields.io/codecov/c/github/MarvinLeRouge/Triton?flag=frontend&label=frontend&logo=codecov)](https://app.codecov.io/gh/MarvinLeRouge/Triton)
+![Tests](https://img.shields.io/badge/Tests-276%20passing-brightgreen)
+[![License](https://img.shields.io/github/license/MarvinLeRouge/Triton?cacheSeconds=3600)](LICENSE)
+
 ## Introduction
 
 Triton (Tracking & Reconnaissance In Tactical Operations Network) est une simulation au tour par tour d'une opération de recherche sonar autonome menée par une flotte multi-drones. Guidée par une carte de probabilité bayésienne, la flotte tente de localiser et de suivre un navire ennemi évasif sur une grille discrétisée.
