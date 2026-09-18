@@ -40,7 +40,7 @@ commit_parsers = [
     { message = "^refactor", group = "Changed" },
     { message = "^perf", group = "Changed" },
     { message = "^revert", group = "Changed" },
-    { message = "^docs", skip = true },
+    { message = "^docs", group = "Documentation" },
     { message = "^chore\\(changelog\\)", skip = true },
     { message = "^chore|^ci", group = "Miscellaneous" },
     { message = "^test", skip = true },
