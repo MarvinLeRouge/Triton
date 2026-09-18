@@ -10,6 +10,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Trigger workflow on all pull requests, not just non-doc changes
 
+- Add pip-audit to dev dependencies
+
+- Replace httpx2 with httpx in dev dependencies
+
 
 ### Miscellaneous
 
@@ -38,6 +42,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Make Codecov thresholds blocking
 
 - Add ci-status aggregator job
+
+- Homogenize job naming and split lint/test/security stages
 
 
 ## [0.6.0] - 2026-08-13
