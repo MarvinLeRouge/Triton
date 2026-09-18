@@ -6,6 +6,41 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Documentation
+
+- Add Phase 7 design-decisions documentation task to the roadmap
+
+- Add CONTRIBUTING.md and CONTRIBUTING.fr.md
+
+- Add CODE_OF_CONDUCT.md and CODE_OF_CONDUCT.fr.md
+
+- Add SECURITY.md and SECURITY.fr.md
+
+- Split roadmap out into docs/roadmap.md
+
+- Add docs/product-context.md
+
+- Add docs/operations.md
+
+- Add docs/design-system.md placeholder
+
+- Add docs/architecture/ per-component notes
+
+- Add docs/guides/ player and developer guides
+
+- Add docs/adr/ architecture decision records
+
+- Document changelog automation and release tagging
+
+- Update changelog unreleased section
+
+- Add architecture summary page
+
+- Document codecov coverage thresholds
+
+- Add badges block with tests, coverage and license
+
+
 ### Fixed
 
 - Trigger workflow on all pull requests, not just non-doc changes
