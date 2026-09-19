@@ -40,6 +40,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Add badges block with tests, coverage and license
 
+- Document the local post-commit changelog hook
+
 
 ### Fixed
 

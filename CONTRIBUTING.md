@@ -103,12 +103,18 @@ CI will reject any pull request that fails these checks.
 
 ## Releases and changelog
 
-The `[Unreleased]` section of `CHANGELOG.md` is maintained automatically: a CI
-workflow (`.github/workflows/changelog.yml`, config in `cliff.toml`) runs
-[git-cliff](https://git-cliff.org/) on every push to `main` and opens or
-updates a pull request with the regenerated section. Never hand-edit
-`CHANGELOG.md`'s `[Unreleased]` section or anything above it; entries before
-`v0.6.0` are frozen hand-written history.
+The `[Unreleased]` section of `CHANGELOG.md` is maintained automatically.
+Primarily by a local `post-commit` hook, wired into the `pre-commit`
+framework as a `post-commit`-stage local hook (`scripts/changelog-post-commit.sh`),
+that runs [git-cliff](https://git-cliff.org/) after each commit and folds the
+regenerated section back into that same commit, preserving the frozen
+pre-`v0.6.0` history via a strip-then-prepend script. As a fallback, a CI
+workflow (`.github/workflows/changelog.yml`, config in `cliff.toml`) still
+runs git-cliff on every push to `main` and opens or updates a pull request
+with the regenerated section, in case a commit lands on `main` without going
+through the local hook. Never hand-edit `CHANGELOG.md`'s `[Unreleased]`
+section or anything above it; entries before `v0.6.0` are frozen hand-written
+history.
 
 To cut an actual release, once `main` reflects the state you want to ship:
 
