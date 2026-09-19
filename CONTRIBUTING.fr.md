@@ -103,13 +103,19 @@ La CI rejettera toute pull request qui ne passe pas ces vérifications.
 
 ## Releases et changelog
 
-La section `[Unreleased]` de `CHANGELOG.md` est maintenue automatiquement :
-un workflow CI (`.github/workflows/changelog.yml`, config dans `cliff.toml`)
-exécute [git-cliff](https://git-cliff.org/) à chaque push sur `main` et
-ouvre ou met à jour une pull request avec la section régénérée. Ne jamais
-modifier à la main la section `[Unreleased]` de `CHANGELOG.md` ni ce qui
-est au-dessus ; les entrées antérieures à `v0.6.0` sont un historique
-rédigé à la main, figé.
+La section `[Unreleased]` de `CHANGELOG.md` est maintenue automatiquement.
+Principalement par un hook local `post-commit`, intégré au framework
+`pre-commit` en tant que hook local à l'étape `post-commit`
+(`scripts/changelog-post-commit.sh`), qui exécute
+[git-cliff](https://git-cliff.org/) après chaque commit et réintègre la
+section régénérée dans ce même commit, en préservant l'historique figé
+antérieur à `v0.6.0` via un script strip-then-prepend. En secours, un
+workflow CI (`.github/workflows/changelog.yml`, config dans `cliff.toml`)
+exécute toujours git-cliff à chaque push sur `main` et ouvre ou met à jour
+une pull request avec la section régénérée, au cas où un commit atterrirait
+sur `main` sans passer par le hook local. Ne jamais modifier à la main la
+section `[Unreleased]` de `CHANGELOG.md` ni ce qui est au-dessus ; les
+entrées antérieures à `v0.6.0` sont un historique rédigé à la main, figé.
 
 Pour sortir une vraie release, une fois que `main` reflète l'état à
 publier :
