@@ -80,6 +80,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Homogenize job naming and split lint/test/security stages
 
+- Add local post-commit hook for changelog generation
+
 
 ## [0.6.0] - 2026-08-13
 
