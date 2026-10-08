@@ -42,6 +42,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Document the local post-commit changelog hook
 
+- Move French community-health docs into docs/i18n/fr
+
 
 ### Fixed
 

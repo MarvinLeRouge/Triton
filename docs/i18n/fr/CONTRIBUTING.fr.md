@@ -1,4 +1,4 @@
-🇫🇷 Version française | [🇬🇧 English version](CONTRIBUTING.md)
+🇫🇷 Version française | [🇬🇧 English version](../../../CONTRIBUTING.md)
 
 ---
 
@@ -135,4 +135,4 @@ vous vous engagez à le respecter.
 ## Licence
 
 En contribuant, vous acceptez que vos contributions soient distribuées sous la
-licence du projet (voir [LICENSE](LICENSE)).
+licence du projet (voir [LICENSE](../../../LICENSE)).
