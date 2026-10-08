@@ -95,4 +95,4 @@ Phase 7 (finalisation & scénarios) est en cours. Voir
 - [Guide joueur](docs/guides/user_guide.fr.md)
 - [Guide développeur](docs/guides/developer_guide.fr.md)
 - [Registre des décisions d'architecture](docs/adr/)
-- [Contribuer](CONTRIBUTING.fr.md)
+- [Contribuer](docs/i18n/fr/CONTRIBUTING.fr.md)
