@@ -44,6 +44,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Move French community-health docs into docs/i18n/fr
 
+- Align readme tagline with repository description
+
 
 ### Fixed
 
