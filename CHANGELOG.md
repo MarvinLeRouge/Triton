@@ -88,6 +88,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Add local post-commit hook for changelog generation
 
+- Ignore codegraph folder
+
 
 ## [0.6.0] - 2026-08-13
 
