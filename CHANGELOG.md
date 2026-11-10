@@ -118,6 +118,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Bump pinia from 3.0.4 to 4.1.0 in /frontend
 
+- Align node version to 26
+
 
 ## [0.6.0] - 2026-08-13
 
