@@ -17,3 +17,7 @@
 - [x] **Phase 5 — Red behavior**: evasion, infiltration objective
 - [x] **Phase 6 — Multi-drone coordination**: map fusion, fleet regroup
 - [ ] **Phase 7 — Polish & scenarios**: configuration, replayability, OWASP security audit, design pass, local/remote demo deployment, design decisions doc
+
+## Section 1 - Maintenance
+
+- [x] FIX-001 - Fix the critical npm audit finding in the frontend (shell-quote)
