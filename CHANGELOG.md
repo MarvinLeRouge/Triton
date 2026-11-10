@@ -57,6 +57,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Replace httpx2 with httpx in dev dependencies
 
+- Resolve critical npm audit finding (FIX-001)
+
 
 ### Miscellaneous
 
