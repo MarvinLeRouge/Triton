@@ -46,6 +46,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Align readme tagline with repository description
 
+- Update python version references (CHORE-001)
+
 
 ### Fixed
 

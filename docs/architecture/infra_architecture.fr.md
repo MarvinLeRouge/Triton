@@ -10,7 +10,7 @@ tables de routage).
 
 | Fichier | Responsabilité |
 |---|---|
-| `Dockerfile.backend` | Image backend — `python:3.13-slim`, dépendances installées via `uv sync --no-dev --frozen`, lance `uvicorn api.main:app` |
+| `Dockerfile.backend` | Image backend — `python:3.14-slim`, dépendances installées via `uv sync --no-dev --frozen`, lance `uvicorn api.main:app` |
 | `frontend/Dockerfile` | Image frontend — multi-stage : `node:22-alpine` build le bundle Vite, puis servi en fichiers statiques par `nginx:alpine` |
 | `docker-compose.yml` | Stack dev — backend/frontend tournent depuis les sources avec hot-reload (`uvicorn --reload`, `npm run dev`), routés via des labels Traefik sur le réseau partagé `traefik-public` |
 | `docker-compose.prod.yml` | Stack prod — les deux services tournent depuis leurs images buildées, entrypoint `websecure` (HTTPS), TLS via Let's Encrypt, domaine depuis `${DOMAIN}` |
