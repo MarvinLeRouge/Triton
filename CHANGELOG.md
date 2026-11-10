@@ -132,6 +132,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Group vitest packages
 
+- Bump vitest and @vitest/coverage-v8 to 5.1.0
+
 
 ## [0.6.0] - 2026-08-13
 
