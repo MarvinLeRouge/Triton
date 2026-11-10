@@ -50,6 +50,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Tick CHORE-002
 
+- Tick FIX-002
+
 
 ### Fixed
 
@@ -60,6 +62,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Replace httpx2 with httpx in dev dependencies
 
 - Resolve critical npm audit finding (FIX-001)
+
+- Bump vitest to 4.1.12 for @vitest/mocker advisories
 
 
 ### Miscellaneous
@@ -123,6 +127,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Align node version to 26
 
 - Update uv lockfile only
+
+- Bump @types/jsdom from 28.0.3 to 30.0.0 in /frontend
+
+- Group vitest packages
 
 
 ## [0.6.0] - 2026-08-13
