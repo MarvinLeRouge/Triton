@@ -102,6 +102,22 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Add dependabot configuration
 
+- Bump node from 22-alpine to 26-alpine in /frontend
+
+- Bump actions/checkout from 4 to 7
+
+- Bump actions/setup-node from 4 to 7
+
+- Bump dorny/paths-filter from 3 to 4
+
+- Bump vitest from 4.1.9 to 4.1.11 in /frontend
+
+- Bump @types/node from 24.13.2 to 26.6.6 in /frontend
+
+- Bump jsdom from 29.1.1 to 31.0.0 in /frontend
+
+- Bump pinia from 3.0.4 to 4.1.0 in /frontend
+
 
 ## [0.6.0] - 2026-08-13
 
