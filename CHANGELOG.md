@@ -61,6 +61,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Resolve critical npm audit finding (FIX-001)
 
+- Bump vitest to 4.1.12 for @vitest/mocker advisories
+
 
 ### Miscellaneous
 
@@ -123,6 +125,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Align node version to 26
 
 - Update uv lockfile only
+
+- Bump @types/jsdom from 28.0.3 to 30.0.0 in /frontend
 
 
 ## [0.6.0] - 2026-08-13
