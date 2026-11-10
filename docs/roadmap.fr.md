@@ -17,3 +17,7 @@
 - [x] **Phase 5 — Comportement Red** : évasion, objectif d'infiltration
 - [x] **Phase 6 — Coordination multi-drones** : fusion de cartes, regroupement de la flotte
 - [ ] **Phase 7 — Finalisation & scénarios** : configuration, rejouabilité, audit sécurité OWASP, passe design, déploiement de démo local/distant, documentation des choix de conception
+
+## Section 1 - Maintenance
+
+- [x] FIX-001 - Corriger la vulnérabilité critique npm audit du frontend (shell-quote)
