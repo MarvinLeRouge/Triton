@@ -94,6 +94,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Upgrade all locked dependencies
 
+- Move to python 3.14
+
 
 ## [0.6.0] - 2026-08-13
 
