@@ -50,6 +50,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Tick CHORE-002
 
+- Tick FIX-002
+
 
 ### Fixed
 
