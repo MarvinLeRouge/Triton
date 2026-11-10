@@ -24,3 +24,4 @@
 - [x] CHORE-001 - Upgrade dependencies, move to Python 3.14, set up Dependabot
 - [x] CHORE-002 - Align Node 26 across CI and dev, lockfile-only Dependabot updates for uv
 - [x] FIX-002 - Fix the vitest dev advisories in the frontend (@vitest/mocker)
+- [x] CHORE-003 - Migrate the frontend to vitest 5

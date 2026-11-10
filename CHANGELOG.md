@@ -52,6 +52,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Tick FIX-002
 
+- Tick CHORE-003
+
 
 ### Fixed
 
@@ -131,6 +133,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Bump @types/jsdom from 28.0.3 to 30.0.0 in /frontend
 
 - Group vitest packages
+
+- Bump vitest and @vitest/coverage-v8 to 5.1.0
 
 
 ## [0.6.0] - 2026-08-13
