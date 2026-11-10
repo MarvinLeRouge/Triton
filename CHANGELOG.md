@@ -46,6 +46,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Align readme tagline with repository description
 
+- Update python version references (CHORE-001)
+
 
 ### Fixed
 
@@ -93,6 +95,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Ignore codegraph folder
 
 - Auto-merge the catch-up CHANGELOG.md PR
+
+- Upgrade all locked dependencies
+
+- Move to python 3.14
+
+- Add dependabot configuration
 
 
 ## [0.6.0] - 2026-08-13

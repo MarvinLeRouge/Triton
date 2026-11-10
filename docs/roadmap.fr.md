@@ -21,3 +21,4 @@
 ## Section 1 - Maintenance
 
 - [x] FIX-001 - Corriger la vulnérabilité critique npm audit du frontend (shell-quote)
+- [x] CHORE-001 - Mise à jour des dépendances, passage à Python 3.14, mise en place de Dependabot

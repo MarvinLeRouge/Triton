@@ -7,7 +7,7 @@
 > *Turn-based simulation of an autonomous multi-drone sonar search: Bayesian probability map, probabilistic detection model, coordinated drone coverage and an evasive target. Python (NumPy) engine, FastAPI and WebSocket, Vue.js frontend.*
 
 [![CI](https://github.com/MarvinLeRouge/Triton/actions/workflows/ci.yml/badge.svg)](https://github.com/MarvinLeRouge/Triton/actions/workflows/ci.yml)
-![Python](https://img.shields.io/badge/Python-3.13+-3776AB?logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.14+-3776AB?logo=python&logoColor=white)
 ![Vue.js](https://img.shields.io/badge/Vue.js-3-4FC08D?logo=vuedotjs&logoColor=white)
 [![Backend coverage](https://img.shields.io/codecov/c/github/MarvinLeRouge/Triton?flag=backend&label=backend&logo=codecov)](https://app.codecov.io/gh/MarvinLeRouge/Triton)
 [![Frontend coverage](https://img.shields.io/codecov/c/github/MarvinLeRouge/Triton?flag=frontend&label=frontend&logo=codecov)](https://app.codecov.io/gh/MarvinLeRouge/Triton)

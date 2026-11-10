@@ -62,10 +62,14 @@ class MyStrategy(SearchStrategy):
         return "my_strategy"  # identifiant stable, exposé à l'API/frontend
 
     def next_target(
-        self, position: tuple[int, int], speed: int,
-        grid: Grid, probability_map: ProbabilityMap,
+        self,
+        position: tuple[int, int],
+        speed: int,
+        grid: Grid,
+        probability_map: ProbabilityMap,
     ) -> tuple[int, int]:
-        ...  # retourne la case (row, col) vers laquelle se déplacer ce tour
+        # retourne la case (row, col) vers laquelle se déplacer ce tour
+        ...
 ```
 
 Ajouter une instance de cette stratégie au pool passé à
