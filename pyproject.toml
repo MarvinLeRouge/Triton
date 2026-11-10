@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Turn-based multi-drone sonar search simulation"
 requires-python = ">=3.14"
 dependencies = [
-    "fastapi[standard]>=0.115.0",
+    "fastapi[standard]>=0.162.1",
     "numpy>=2.1.0",
 ]
 
