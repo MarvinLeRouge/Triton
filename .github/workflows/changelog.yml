@@ -25,7 +25,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "26"
 
       # Only the "Unreleased" section is regenerated: tagged version sections
       # are frozen history and must never be rewritten by this workflow.

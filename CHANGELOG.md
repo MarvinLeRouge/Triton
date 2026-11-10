@@ -48,6 +48,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Update python version references (CHORE-001)
 
+- Tick CHORE-002
+
 
 ### Fixed
 
@@ -117,6 +119,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Bump jsdom from 29.1.1 to 31.0.0 in /frontend
 
 - Bump pinia from 3.0.4 to 4.1.0 in /frontend
+
+- Align node version to 26
+
+- Update uv lockfile only
 
 
 ## [0.6.0] - 2026-08-13
