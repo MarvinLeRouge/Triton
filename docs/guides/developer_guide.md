@@ -60,10 +60,14 @@ class MyStrategy(SearchStrategy):
         return "my_strategy"  # stable id, exposed to the API/frontend
 
     def next_target(
-        self, position: tuple[int, int], speed: int,
-        grid: Grid, probability_map: ProbabilityMap,
+        self,
+        position: tuple[int, int],
+        speed: int,
+        grid: Grid,
+        probability_map: ProbabilityMap,
     ) -> tuple[int, int]:
-        ...  # return the (row, col) cell to move to this turn
+        # return the (row, col) cell to move to this turn
+        ...
 ```
 
 Add an instance of it to the pool passed into `StrategyAssignment` when
