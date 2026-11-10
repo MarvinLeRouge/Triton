@@ -48,6 +48,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Update python version references (CHORE-001)
 
+- Tick CHORE-002
+
 
 ### Fixed
 

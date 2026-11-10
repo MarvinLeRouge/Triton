@@ -22,3 +22,4 @@
 
 - [x] FIX-001 - Fix the critical npm audit finding in the frontend (shell-quote)
 - [x] CHORE-001 - Upgrade dependencies, move to Python 3.14, set up Dependabot
+- [x] CHORE-002 - Align Node 26 across CI and dev, lockfile-only Dependabot updates for uv
