@@ -136,6 +136,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Bump vitest and @vitest/coverage-v8 to 5.1.0
 
+- Keep the python base image minor out of dependabot
+
 
 ## [0.6.0] - 2026-08-13
 

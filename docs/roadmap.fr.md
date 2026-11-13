@@ -25,3 +25,4 @@
 - [x] CHORE-002 - Aligner Node 26 sur la CI et le dev, mises à jour Dependabot uv limitées au lockfile
 - [x] FIX-002 - Corriger les vulnérabilités vitest du frontend (@vitest/mocker)
 - [x] CHORE-003 - Migrer le frontend vers vitest 5
+- [x] CHORE-004 - Bloquer les montées de version mineure de l'image Python dans Dependabot
