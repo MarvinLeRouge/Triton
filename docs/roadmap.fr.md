@@ -26,3 +26,4 @@
 - [x] FIX-002 - Corriger les vulnérabilités vitest du frontend (@vitest/mocker)
 - [x] CHORE-003 - Migrer le frontend vers vitest 5
 - [x] CHORE-004 - Bloquer les montées de version mineure de l'image Python dans Dependabot
+- [x] CI-001 - Lancer la CI sur la PR du bot changelog pour que son auto-merge aboutisse

@@ -138,6 +138,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Keep the python base image minor out of dependabot
 
+- Run CI on the changelog bot PR so its auto-merge can complete
+
 
 ## [0.6.0] - 2026-08-13
 
