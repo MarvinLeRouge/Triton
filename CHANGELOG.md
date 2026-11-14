@@ -140,6 +140,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Run CI on the changelog bot PR so its auto-merge can complete
 
+- Bump peter-evans/create-pull-request from 7 to 8
+
+- Bump the minor-and-patch group
+
 
 ## [0.6.0] - 2026-08-13
 
