@@ -66,7 +66,7 @@ Follow [docs/operations.md](docs/operations.md) for the one-time local Traefik s
 
 ```bash
 # Add to /etc/hosts: 127.0.0.1 triton.marvinlerouge.local
-docker compose up
+docker compose up --build   # --build after changes to Dockerfile.backend, pyproject.toml or uv.lock
 # Open http://triton.marvinlerouge.local
 ```
 
@@ -77,6 +77,10 @@ and run the backend separately:
 ```bash
 uv run uvicorn api.main:app --reload
 ```
+
+Remove or comment out that line before going back to Docker: under Docker the
+backend port is not published (only Traefik routes to it), so the page would
+stay on "disconnected".
 
 ---
 
