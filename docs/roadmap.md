@@ -35,3 +35,7 @@
 
 - [x] DOCS-001 - Correct the README and roadmap before the project sheet (stale badge, headings, domain vocabulary, em dashes)
 - [x] DOCS-002 - Warn about the frontend .env override and stale backend image in the README and operations docs
+
+## Section 3 - Testing
+
+- [x] TEST-001 - Close per-file frontend coverage gaps (branches in the game store and canvas)

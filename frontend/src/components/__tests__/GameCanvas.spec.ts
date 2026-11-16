@@ -24,6 +24,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  vi.restoreAllMocks()
 })
 
 function mountCanvas() {
@@ -150,5 +151,56 @@ describe('GameCanvas', () => {
 
     // drone_idx 0 is in detection_events → its cone must use the orange flash color
     expect(fillStyles).toContain('rgba(255, 140, 0, 0.4)')
+  })
+
+  it('skips drawing when the game state is cleared on disconnect', async () => {
+    class CapturingMock extends WsMock {
+      static instances: CapturingMock[] = []
+      constructor() {
+        super()
+        CapturingMock.instances.push(this)
+      }
+    }
+    CapturingMock.instances = []
+    vi.stubGlobal('WebSocket', CapturingMock)
+    const wrapper = mountCanvas()
+    const canvas = wrapper.find('canvas').element as HTMLCanvasElement
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+    const clearRectSpy = vi.spyOn(ctx, 'clearRect')
+
+    CapturingMock.instances[0]?.onmessage?.({ data: JSON.stringify(DETECTION_GAME_STATE) })
+    await nextTick()
+    expect(clearRectSpy).toHaveBeenCalledTimes(1)
+
+    CapturingMock.instances[0]?.close()
+    await nextTick()
+
+    // gameState is null after close: render returns early and the last frame is kept
+    expect(clearRectSpy).toHaveBeenCalledTimes(1)
+    expect(wrapper.find('.status').text()).toBe('disconnected')
+  })
+
+  it('renders without error when no 2d context is available', async () => {
+    class CapturingMock extends WsMock {
+      static instances: CapturingMock[] = []
+      constructor() {
+        super()
+        CapturingMock.instances.push(this)
+      }
+    }
+    CapturingMock.instances = []
+    vi.stubGlobal('WebSocket', CapturingMock)
+    const getContextSpy = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null)
+    // Vue reports errors thrown in watcher callbacks through console.warn / console.error
+    const errorSpy = vi.spyOn(console, 'error')
+    const warnSpy = vi.spyOn(console, 'warn')
+    mountCanvas()
+
+    CapturingMock.instances[0]?.onmessage?.({ data: JSON.stringify(DETECTION_GAME_STATE) })
+    await nextTick()
+
+    expect(getContextSpy).toHaveBeenCalledWith('2d')
+    expect(errorSpy).not.toHaveBeenCalled()
+    expect(warnSpy).not.toHaveBeenCalled()
   })
 })
