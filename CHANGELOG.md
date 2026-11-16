@@ -56,6 +56,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Correct readme and roadmap before the project sheet
 
+- Warn about the frontend env override and stale backend image
+
 
 ### Fixed
 

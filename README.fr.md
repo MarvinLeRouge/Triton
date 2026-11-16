@@ -66,7 +66,7 @@ Suivre [docs/operations.fr.md](docs/operations.fr.md) pour le setup Traefik loca
 
 ```bash
 # Ajouter dans /etc/hosts : 127.0.0.1 triton.marvinlerouge.local
-docker compose up
+docker compose up --build   # --build après une modification de Dockerfile.backend, pyproject.toml ou uv.lock
 # Ouvrir http://triton.marvinlerouge.local
 ```
 
@@ -77,6 +77,10 @@ et lancer le backend séparément :
 ```bash
 uv run uvicorn api.main:app --reload
 ```
+
+Supprimer ou commenter cette ligne avant de revenir à Docker : sous Docker, le
+port du backend n'est pas publié (seul Traefik y route), la page resterait donc
+sur "disconnected".
 
 ---
 

@@ -11,6 +11,9 @@
 Run the backend and frontend separately (see the root [README](../README.md)
 for the exact commands). The frontend needs `VITE_WS_URL=ws://localhost:8000/ws/game`
 in `frontend/.env` to reach a backend started with `uvicorn` directly.
+Remove or comment out that line before going back to Docker: under Docker the
+backend port is not published (only Traefik routes to it), so the page would
+stay on "disconnected".
 
 ### With Docker + Traefik (recommended)
 
@@ -66,8 +69,12 @@ echo "127.0.0.1 triton.marvinlerouge.local" | sudo tee -a /etc/hosts
 #### 3. Start Triton
 
 ```bash
-docker compose up
+docker compose up --build
 ```
+
+`--build` rebuilds the backend image, needed after changes to
+`Dockerfile.backend`, `pyproject.toml` or `uv.lock` (Compose otherwise reuses
+the existing image).
 
 Available at `http://triton.marvinlerouge.local`.
 
