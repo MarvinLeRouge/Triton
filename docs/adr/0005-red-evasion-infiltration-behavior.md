@@ -6,7 +6,7 @@
 
 ## Context
 
-Red needed a non-trivial adversary behavior — advancing on a straight line
+Red needed a non-trivial adversary behavior: advancing on a straight line
 toward its objective would make the search trivial and uninteresting.
 
 ## Decision
@@ -20,7 +20,7 @@ directional sonar model.
 
 ## Alternatives considered
 
-- Mirroring Blue's `SearchStrategy` abstraction for Red — rejected. Red has
+- Mirroring Blue's `SearchStrategy` abstraction for Red: rejected. Red has
   one deterministic decision process (evade if threatened, otherwise
   advance toward the objective), not a rotating pool of interchangeable
   behaviors, so a shared interface would add indirection without any reuse

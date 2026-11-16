@@ -43,7 +43,7 @@ Voir [docs/architecture/](../architecture/) pour le détail par composant
   ```
 
   `result` vaut `in_progress`, `blue_wins`, ou `red_wins`. La connexion est
-  une `Simulation` par socket — il n'y a pas encore de requête que le client
+  une `Simulation` par socket ; il n'y a pas encore de requête que le client
   puisse renvoyer (contrôles de lecture prévus en Phase 7).
 
 ## Brancher un nouvel algorithme
@@ -77,7 +77,7 @@ Ajouter une instance de cette stratégie au pool passé à
 drone tire indépendamment une chance de basculer vers une stratégie
 choisie au hasard dans ce pool à chaque tour
 (`StrategyAssignment.advance()`), donc une nouvelle stratégie n'a qu'à être
-présente dans le pool pour commencer à être utilisée — aucun autre
+présente dans le pool pour commencer à être utilisée, aucun autre
 câblage nécessaire.
 
 ### Un nouveau comportement Red (évasion, mouvement)

@@ -10,8 +10,8 @@ probabilité), sans passe de design visuel volontaire pour l'instant. Ce
 document décrit les sections que ce fichier est censé contenir une fois la
 passe de design `impeccable` de la Phase 7 réalisée, afin que le périmètre
 prévu soit visible avant que le travail ne commence. Le contenu ci-dessous
-sera remplacé par les décisions de design réelles et évaluées à ce moment-là
-— à traiter comme un espace réservé, pas comme une spécification arrêtée.
+sera remplacé par les décisions de design réelles et évaluées à ce moment-là.
+À traiter comme un espace réservé, pas comme une spécification arrêtée.
 
 ## Sections attendues (à remplir en Phase 7)
 
@@ -36,6 +36,6 @@ sera remplacé par les décisions de design réelles et évaluées à ce moment-
 
 Selon la décision de roadmap propre au projet, la passe de design
 `impeccable` est volontairement programmée en Phase 7, une fois l'API, le
-protocole WebSocket et les surfaces UI stabilisés — la faire plus tôt aurait
+protocole WebSocket et les surfaces UI stabilisés : la faire plus tôt aurait
 signifié refaire le travail au fil des évolutions du layout du canvas sur
 les Phases 1 à 6 (cônes, heatmap, machine à états, etc.).

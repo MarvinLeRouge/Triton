@@ -104,7 +104,7 @@ docker compose -f docker-compose.prod.yml up -d
 
 **Statut** : cette configuration existe et reflète le setup dev, mais un
 déploiement de démo public distant (sur l'instance Traefik de production
-existante de l'utilisateur) n'a pas encore été exécuté — prévu en Phase 7
+existante de l'utilisateur) n'a pas encore été exécuté, prévu en Phase 7
 (voir [docs/roadmap.fr.md](roadmap.fr.md)).
 
 ## CI/CD
@@ -114,5 +114,5 @@ existante de l'utilisateur) n'a pas encore été exécuté — prévu en Phase 7
 mypy strict, pytest avec couverture ; lint frontend (oxlint + ESLint),
 vue-tsc, vitest avec couverture. Les deux jobs envoient leur couverture à
 Codecov (OIDC, pas de token stocké) avec des flags `backend`/`frontend`
-séparés. Aucune étape de déploiement — le déploiement est manuel (commandes
+séparés. Aucune étape de déploiement : le déploiement est manuel (commandes
 `docker compose` ci-dessus).

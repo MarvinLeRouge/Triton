@@ -10,16 +10,16 @@ tables).
 
 | File | Responsibility |
 |---|---|
-| `Dockerfile.backend` | Backend image — `python:3.14-slim`, dependencies installed via `uv sync --no-dev --frozen`, runs `uvicorn api.main:app` |
-| `frontend/Dockerfile` | Frontend image — multi-stage: `node:22-alpine` builds the Vite bundle, then served as static files by `nginx:alpine` |
-| `docker-compose.yml` | Dev stack — backend/frontend run from source with hot-reload (`uvicorn --reload`, `npm run dev`), routed via Traefik labels on the shared `traefik-public` network |
-| `docker-compose.prod.yml` | Prod stack — both services run from their built images, `websecure` (HTTPS) entrypoint, TLS via Let's Encrypt, domain from `${DOMAIN}` |
+| `Dockerfile.backend` | Backend image: `python:3.14-slim`, dependencies installed via `uv sync --no-dev --frozen`, runs `uvicorn api.main:app` |
+| `frontend/Dockerfile` | Frontend image, multi-stage: `node:22-alpine` builds the Vite bundle, then served as static files by `nginx:alpine` |
+| `docker-compose.yml` | Dev stack: backend/frontend run from source with hot-reload (`uvicorn --reload`, `npm run dev`), routed via Traefik labels on the shared `traefik-public` network |
+| `docker-compose.prod.yml` | Prod stack: both services run from their built images, `websecure` (HTTPS) entrypoint, TLS via Let's Encrypt, domain from `${DOMAIN}` |
 
 ## Routing split
 
 Both compose files route `/api/*` to the backend with the prefix stripped,
 and `/ws/*` to the backend without stripping (WebSocket), leaving everything
-else to the frontend service — see the routing tables in
+else to the frontend service, see the routing tables in
 [docs/operations.md](../operations.md).
 
 ## Status
@@ -27,4 +27,4 @@ else to the frontend service — see the routing tables in
 Local deployment via Traefik is in place and used daily in development.
 Remote/public demo deployment (against the user's existing production
 Traefik instance) is configured (`docker-compose.prod.yml`) but not yet
-executed — planned for Phase 7.
+executed, planned for Phase 7.

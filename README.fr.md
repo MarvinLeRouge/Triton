@@ -11,7 +11,6 @@
 ![Vue.js](https://img.shields.io/badge/Vue.js-3-4FC08D?logo=vuedotjs&logoColor=white)
 [![Backend coverage](https://img.shields.io/codecov/c/github/MarvinLeRouge/Triton?flag=backend&label=backend&logo=codecov)](https://app.codecov.io/gh/MarvinLeRouge/Triton)
 [![Frontend coverage](https://img.shields.io/codecov/c/github/MarvinLeRouge/Triton?flag=frontend&label=frontend&logo=codecov)](https://app.codecov.io/gh/MarvinLeRouge/Triton)
-![Tests](https://img.shields.io/badge/Tests-276%20passing-brightgreen)
 [![License](https://img.shields.io/github/license/MarvinLeRouge/Triton?cacheSeconds=3600)](LICENSE)
 
 ## Introduction
@@ -20,23 +19,24 @@ Triton (Tracking & Reconnaissance In Tactical Operations Network) est une simula
 
 ## Concepts clés
 
-- Modèle de détection probabiliste (sonar conique, POD)
-- Mise à jour bayésienne de la carte à chaque balayage
-- Coordination autonome des drones (optimisation de la couverture)
-- Comportement ennemi adaptatif (évasion, contournement, fuite)
+- **Probabilité de détection (POD)** : chaque drone porte un sonar conique dont la POD décroît exponentiellement avec la distance ([ADR-0002](docs/adr/0002-cone-shaped-sonar-pod-exponential-decay.md))
+- **Carte de recherche bayésienne** : après chaque balayage, la carte de probabilité est mise à jour par la règle de Bayes, puis diffusée entre deux balayages pour modéliser le déplacement de la cible ([ADR-0003](docs/adr/0003-bayesian-probability-map-temporal-diffusion.md))
+- **Fusion des cartes** : chaque drone tient sa propre carte, fusionnée périodiquement en un consensus de flotte ([ADR-0006](docs/adr/0006-per-drone-maps-periodic-fusion.md))
+- **Machine à états de détection** : chaque drone passe par les états searching, signaling, confirming et tracking ([ADR-0004](docs/adr/0004-search-strategies-detection-state-machine.md)) ; sur un contact confirmé, la flotte se regroupe autour de lui ([ADR-0007](docs/adr/0007-fleet-regroup-minimum-spacing.md))
+- **Comportement ennemi adaptatif** : évasion, contournement, fuite ([ADR-0005](docs/adr/0005-red-evasion-infiltration-behavior.md))
 
 ## Stack technique
 
-- **Moteur** — Python (NumPy)
-- **API** — FastAPI + WebSocket
-- **Frontend** — Vue 3 + Vite + Canvas API
-- **Infra** — Docker + Traefik
+- **Moteur** : Python (NumPy)
+- **API** : FastAPI + WebSocket
+- **Frontend** : Vue 3 + Vite + Canvas API
+- **Infra** : Docker + Traefik
 
 ## Développement local
 
 ### Prérequis
 
-- [uv](https://docs.astral.sh/uv/) — gestionnaire de paquets Python
+- [uv](https://docs.astral.sh/uv/) : gestionnaire de paquets Python
 - Node.js ≥ 22
 - Docker avec Compose v2 (`docker compose`)
 

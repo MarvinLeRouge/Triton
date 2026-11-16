@@ -35,7 +35,7 @@ doivent se prendre à partir d'un état de croyance.
   confirmé.
 - **Red** (l'adversaire) : un unique navire avec un mouvement de base, un
   comportement d'évasion dès qu'il perçoit qu'il pourrait être suivi, et un
-  objectif d'infiltration — il gagne en atteignant une zone définie derrière
+  objectif d'infiltration : il gagne en atteignant une zone définie derrière
   le point de spawn du mothership Blue sans être détecté, ou en ne se
   faisant jamais confirmer avant la limite de tours.
 

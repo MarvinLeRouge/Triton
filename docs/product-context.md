@@ -31,7 +31,7 @@ be made from a belief state instead.
   tracking) as evidence accumulates, and regroup around whichever drone is
   closest to a confirmed contact.
 - **Red** (the adversary): a single vessel with baseline movement, evasion
-  behavior once it senses it may be tracked, and an infiltration objective —
+  behavior once it senses it may be tracked, and an infiltration objective:
   it wins by reaching a defined zone behind the Blue mothership's spawn
   point undetected, or by never being confirmed within the turn limit.
 

@@ -22,10 +22,10 @@ This was a deliberate breaking rename (`Simulation.probability_map` →
 
 ## Alternatives considered
 
-- Keep a single shared map (status quo) — rejected, it defeats the purpose
+- Keep a single shared map (status quo): rejected, it defeats the purpose
   of giving drones independent search behavior.
 - A mothership↔drone range constraint gating which drones participate in a
-  given sync (only fusing/redistributing to drones within range) — explicitly
+  given sync (only fusing/redistributing to drones within range): explicitly
   considered and deferred, not implemented for this branch: all drones sync
   unconditionally regardless of distance to the mothership.
 

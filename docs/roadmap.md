@@ -6,17 +6,20 @@
 
 ## ✅ Planning
 
-- [x] Project scoping & phase planning — architecture, naming conventions (Blue/Red factions), default simulation parameters, tooling (uv, ruff, mypy, ESLint, Prettier, Vitest, Codecov)
+- [x] Project scoping & phase planning: architecture, naming conventions (Blue/Red factions), default simulation parameters, tooling (uv, ruff, mypy, ESLint, Prettier, Vitest, Codecov)
 
-## 🔜 Planned
+## ✅ Done
 
-- [x] **Phase 1 — Foundations**: grid, entities, initial placement, end-to-end pipeline (engine, API, frontend, Docker/Traefik)
-- [x] **Phase 2 — Sonar model**: cone-shaped POD, detection probability
-- [x] **Phase 3 — Bayesian map**: probability map, Bayesian update, temporal diffusion
-- [x] **Phase 4 — Drone intelligence**: search strategies, detection state machine
-- [x] **Phase 5 — Red behavior**: evasion, infiltration objective
-- [x] **Phase 6 — Multi-drone coordination**: map fusion, fleet regroup
-- [ ] **Phase 7 — Polish & scenarios**: configuration, replayability, OWASP security audit, design pass, local/remote demo deployment, design decisions doc
+- [x] **Phase 1 - Foundations**: grid, entities, initial placement, end-to-end pipeline (engine, API, frontend, Docker/Traefik)
+- [x] **Phase 2 - Sonar model**: cone-shaped POD, detection probability
+- [x] **Phase 3 - Bayesian map**: probability map, Bayesian update, temporal diffusion
+- [x] **Phase 4 - Drone intelligence**: search strategies, detection state machine
+- [x] **Phase 5 - Red behavior**: evasion, infiltration objective
+- [x] **Phase 6 - Multi-drone coordination**: map fusion, fleet regroup
+
+## 🚧 In progress
+
+- [ ] **Phase 7 - Polish & scenarios**: configuration, replayability, OWASP security audit, design pass, local/remote demo deployment, design decisions doc
 
 ## Section 1 - Maintenance
 
@@ -27,3 +30,7 @@
 - [x] CHORE-003 - Migrate the frontend to vitest 5
 - [x] CHORE-004 - Keep the Python base image on its current minor in Dependabot
 - [x] CI-001 - Run CI on the changelog bot PR so its auto-merge can complete
+
+## Section 2 - Documentation
+
+- [x] DOCS-001 - Correct the README and roadmap before the project sheet (stale badge, headings, domain vocabulary, em dashes)

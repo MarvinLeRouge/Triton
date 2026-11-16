@@ -30,5 +30,5 @@ projet personnel.
 Aucun audit de sécurité formel n'a encore été réalisé. Un audit dédié basé
 sur l'OWASP (surface API/WebSocket, gestion des entrées, configuration
 CORS/Traefik, dépendances) est prévu en Phase 7 de la roadmap, une fois les
-surfaces API et frontend stabilisées — voir
+surfaces API et frontend stabilisées, voir
 [docs/roadmap.fr.md](../../roadmap.fr.md).

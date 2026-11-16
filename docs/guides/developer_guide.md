@@ -41,7 +41,7 @@ See [docs/architecture/](../architecture/) for a per-component breakdown
   ```
 
   `result` is one of `in_progress`, `blue_wins`, `red_wins`. The connection
-  is one `Simulation` per socket — there is no request the client can send
+  is one `Simulation` per socket; there is no request the client can send
   back yet (playback controls are planned for Phase 7).
 
 ## Plugging in a new algorithm
@@ -74,7 +74,7 @@ Add an instance of it to the pool passed into `StrategyAssignment` when
 constructing a `Simulation`. Each drone independently rolls a chance to
 switch to a randomly picked strategy from that pool every turn
 (`StrategyAssignment.advance()`), so a new strategy just needs to be in the
-pool to start being used — no other wiring required.
+pool to start being used, no other wiring required.
 
 ### A new Red behavior (evasion, movement)
 

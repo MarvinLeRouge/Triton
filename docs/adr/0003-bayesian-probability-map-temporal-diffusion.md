@@ -14,7 +14,7 @@ reacting only to the current turn's raw detection outcome.
 
 Introduce a `ProbabilityMap` over the grid, updated via a Bayesian update on
 each sonar sweep (reinforcing cells consistent with a detection or
-non-detection) and periodically diffused — spreading confidence outward
+non-detection) and periodically diffused, spreading confidence outward
 toward neighboring cells over time, to model Red's ability to move between
 sweeps. At this stage, the fleet shared a single map (`Simulation.probability_map`,
 singular).
@@ -22,9 +22,9 @@ singular).
 ## Alternatives considered
 
 - A decaying "last known position" heuristic instead of a full probability
-  distribution — rejected, it cannot represent a multi-modal belief (e.g.
+  distribution: rejected, it cannot represent a multi-modal belief (e.g.
   after Red disappears from view, having possibly gone one of two ways).
-- Per-drone independent maps from the start — not adopted at this stage; a
+- Per-drone independent maps from the start: not adopted at this stage; a
   single shared map made fleet-wide coordination implicit (every drone acts
   on the same picture), which was judged sufficient before individual drone
   autonomy became a design goal. This was revisited in Phase 6 (see

@@ -11,7 +11,6 @@
 ![Vue.js](https://img.shields.io/badge/Vue.js-3-4FC08D?logo=vuedotjs&logoColor=white)
 [![Backend coverage](https://img.shields.io/codecov/c/github/MarvinLeRouge/Triton?flag=backend&label=backend&logo=codecov)](https://app.codecov.io/gh/MarvinLeRouge/Triton)
 [![Frontend coverage](https://img.shields.io/codecov/c/github/MarvinLeRouge/Triton?flag=frontend&label=frontend&logo=codecov)](https://app.codecov.io/gh/MarvinLeRouge/Triton)
-![Tests](https://img.shields.io/badge/Tests-276%20passing-brightgreen)
 [![License](https://img.shields.io/github/license/MarvinLeRouge/Triton?cacheSeconds=3600)](LICENSE)
 
 ## Introduction
@@ -20,23 +19,24 @@ Triton (Tracking & Reconnaissance In Tactical Operations Network) is a turn-base
 
 ## Key concepts
 
-- Probabilistic detection model (cone-shaped sonar, POD)
-- Bayesian map update on each sensor sweep
-- Autonomous drone coordination (coverage optimization)
-- Adaptive enemy behavior (evasion, bypass, flight)
+- **Probability of detection (POD)**: each drone carries a cone-shaped sonar whose POD decays exponentially with distance ([ADR-0002](docs/adr/0002-cone-shaped-sonar-pod-exponential-decay.md))
+- **Bayesian search map**: after each sweep, the probability map is updated with Bayes' rule, then diffused between sweeps to model target movement ([ADR-0003](docs/adr/0003-bayesian-probability-map-temporal-diffusion.md))
+- **Map fusion**: each drone keeps its own map, fused periodically into a fleet consensus ([ADR-0006](docs/adr/0006-per-drone-maps-periodic-fusion.md))
+- **Detection state machine**: each drone moves through searching, signaling, confirming and tracking ([ADR-0004](docs/adr/0004-search-strategies-detection-state-machine.md)); on a confirmed contact, the fleet regroups around it ([ADR-0007](docs/adr/0007-fleet-regroup-minimum-spacing.md))
+- **Adaptive enemy behavior**: evasion, bypass, flight ([ADR-0005](docs/adr/0005-red-evasion-infiltration-behavior.md))
 
 ## Stack
 
-- **Engine** — Python (NumPy)
-- **API** — FastAPI + WebSocket
-- **Frontend** — Vue 3 + Vite + Canvas API
-- **Infra** — Docker + Traefik
+- **Engine**: Python (NumPy)
+- **API**: FastAPI + WebSocket
+- **Frontend**: Vue 3 + Vite + Canvas API
+- **Infra**: Docker + Traefik
 
 ## Local Development
 
 ### Prerequisites
 
-- [uv](https://docs.astral.sh/uv/) — Python package manager
+- [uv](https://docs.astral.sh/uv/): Python package manager
 - Node.js ≥ 22
 - Docker with Compose v2 (`docker compose`)
 
