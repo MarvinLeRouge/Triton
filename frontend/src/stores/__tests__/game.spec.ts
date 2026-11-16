@@ -1,3 +1,4 @@
+/// <reference types="vitest/jsdom" />
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -164,5 +165,36 @@ describe('disconnect()', () => {
     WsMock.instance!.simulateMessage(SAMPLE_STATE)
     store.disconnect()
     expect(store.gameState).toBeNull()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// default WebSocket URL
+// ---------------------------------------------------------------------------
+
+describe('connect() without an explicit url', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    jsdom.reconfigure({ url: 'http://localhost:3000/' })
+  })
+
+  it('uses VITE_WS_URL when it is set', () => {
+    vi.stubEnv('VITE_WS_URL', 'ws://override.test/ws/game')
+    useGameStore().connect()
+    expect(WsMock.instance?.url).toBe('ws://override.test/ws/game')
+  })
+
+  it('derives a ws: url from the page host over http', () => {
+    vi.stubEnv('VITE_WS_URL', '')
+    jsdom.reconfigure({ url: 'http://triton.test:8080/' })
+    useGameStore().connect()
+    expect(WsMock.instance?.url).toBe('ws://triton.test:8080/ws/game')
+  })
+
+  it('derives a wss: url from the page host over https', () => {
+    vi.stubEnv('VITE_WS_URL', '')
+    jsdom.reconfigure({ url: 'https://triton.test/' })
+    useGameStore().connect()
+    expect(WsMock.instance?.url).toBe('wss://triton.test/ws/game')
   })
 })

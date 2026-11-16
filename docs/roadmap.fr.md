@@ -35,3 +35,7 @@
 
 - [x] DOCS-001 - Corriger le README et la feuille de route avant la fiche projet (badge figé, titres, vocabulaire du domaine, tirets cadratins)
 - [x] DOCS-002 - Signaler le piège du .env frontend et de l'image backend périmée dans le README et la doc d'exploitation
+
+## Section 3 - Tests
+
+- [x] TEST-001 - Combler les trous de couverture par fichier du frontend (branches du store de jeu et du canvas)
