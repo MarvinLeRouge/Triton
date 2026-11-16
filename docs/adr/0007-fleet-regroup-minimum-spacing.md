@@ -16,22 +16,22 @@ being flanked by Red all at once.
 As soon as any drone reaches `CONFIRMING`/`TRACKING`, every other drone
 abandons its assigned `SearchStrategy` and moves toward that drone's own
 computed destination for the turn (not its pre-move position) via
-`regroup_target()` — a speed-clamped per-axis step mirroring
-`red_baseline_target`'s movement math — while rejecting only a step that
+`regroup_target()`, a speed-clamped per-axis step mirroring
+`red_baseline_target`'s movement math, while rejecting only a step that
 would both close the distance to another Blue unit **and** end up under a
 minimum spacing floor derived from `SonarModel.range_cells`.
 
 ## Alternatives considered
 
 - Rejecting any position under `min_spacing` regardless of direction of
-  travel — this was the initial design. Found during final review to freeze
+  travel: this was the initial design. Found during final review to freeze
   83% of regroup drone-turns in production, because drones' actual spawn
   distances (≤6 cells) are already below the sonar-derived `min_spacing`
-  (8 cells by default) — a drone already "too close" could never move.
+  (8 cells by default), so a drone already "too close" could never move.
   Corrected to only reject *closing* moves, so an already-close drone keeps
   the ability to move as long as it doesn't reduce spacing further.
 - Seeding the anchor's occupied-cell check with its pre-move position
-  instead of its actual computed destination — tried and rejected, measured
+  instead of its actual computed destination: tried and rejected, measured
   to cause ~26% of regroup turns to end with two drones stacked on the same
   cell, since the anchor always moves via its own strategy afterward.
 

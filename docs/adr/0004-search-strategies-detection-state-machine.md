@@ -24,18 +24,18 @@ global win condition.
 
 ## Alternatives considered
 
-- A single fixed strategy for the whole fleet — rejected in favor of a pool,
+- A single fixed strategy for the whole fleet: rejected in favor of a pool,
   to get variety and robustness in coverage rather than every drone
   behaving identically.
-- A gradual decay of detection state on lost contact — rejected in favor of
+- A gradual decay of detection state on lost contact: rejected in favor of
   an immediate reset to `SEARCHING` on any missed detection, judged simpler
   and consistent with the existing fleet-wide streak's own behavior.
 
 ## Consequences / future evolution
 
 Adding a new search strategy only requires implementing the interface and
-adding it to the pool passed into `StrategyAssignment` — no other wiring
+adding it to the pool passed into `StrategyAssignment`, no other wiring
 required (see the [developer guide](../guides/developer_guide.md)). The
 state machine's thresholds being aligned with, but not derived from,
 `lock_turns` is a convention that could drift if either is tuned in
-isolation — not yet enforced by a shared constant.
+isolation, not yet enforced by a shared constant.

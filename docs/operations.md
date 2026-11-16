@@ -102,7 +102,7 @@ docker compose -f docker-compose.prod.yml up -d
 
 **Status**: this configuration exists and mirrors the dev setup, but a
 public remote demo deployment (against the user's existing production
-Traefik instance) has not been executed yet — planned for Phase 7 (see
+Traefik instance) has not been executed yet, planned for Phase 7 (see
 [docs/roadmap.md](roadmap.md)).
 
 ## CI/CD
@@ -111,5 +111,5 @@ Traefik instance) has not been executed yet — planned for Phase 7 (see
 branches, and on every pull request: backend lint (ruff check + format),
 mypy strict, pytest with coverage; frontend lint (oxlint + ESLint), vue-tsc,
 vitest with coverage. Both jobs upload coverage to Codecov (OIDC, no stored
-token) with separate `backend`/`frontend` flags. There is no deploy step —
+token) with separate `backend`/`frontend` flags. There is no deploy step:
 deployment is manual (`docker compose` commands above).

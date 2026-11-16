@@ -54,6 +54,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Tick CHORE-003
 
+- Correct readme and roadmap before the project sheet
+
 
 ### Fixed
 

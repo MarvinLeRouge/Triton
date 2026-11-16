@@ -9,8 +9,8 @@ unstyled Canvas view (grid, entities, sonar cones, probability heatmap) with
 no deliberate visual design pass yet. This document describes the sections
 this file is expected to contain once the Phase 7 `impeccable` design pass
 runs, so the intended scope is visible before the work starts. Content below
-will be replaced with the actual, evaluated design decisions at that point —
-treat it as a placeholder, not a settled specification.
+will be replaced with the actual, evaluated design decisions at that point.
+Treat it as a placeholder, not a settled specification.
 
 ## Expected sections (to be filled in during Phase 7)
 
@@ -31,6 +31,6 @@ treat it as a placeholder, not a settled specification.
 
 Per the project's own roadmap decision, the `impeccable` design pass is
 deliberately scheduled for Phase 7, once the API, WebSocket protocol, and UI
-surfaces have stabilized — running it earlier would mean redoing work as the
+surfaces have stabilized: running it earlier would mean redoing work as the
 canvas layout kept changing across Phases 1–6 (cones, heatmap, state
 machine, etc.).

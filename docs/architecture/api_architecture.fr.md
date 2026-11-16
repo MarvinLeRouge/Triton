@@ -25,7 +25,7 @@ OpenAPI et est documenté à la place dans le
 
 ## Notes de conception
 
-- Une instance `Simulation` par connexion WebSocket — aucun état partagé
+- Une instance `Simulation` par connexion WebSocket, aucun état partagé
   entre parties concurrentes, aucune persistance.
 - La boucle de tour tourne côté serveur à intervalle fixe (`STEP_INTERVAL`) ;
   le frontend n'est qu'un afficheur passif de l'état qu'il reçoit.

@@ -10,7 +10,7 @@ bienvenues mais restent limitées en portée.
 
 ## Prérequis
 
-- [uv](https://docs.astral.sh/uv/) — gestionnaire de paquets Python
+- [uv](https://docs.astral.sh/uv/) : gestionnaire de paquets Python
 - Node.js ≥ 22
 - Docker avec Compose v2 (`docker compose`), pour la stack complète via Traefik
 
@@ -69,7 +69,7 @@ Modified files:
 ```
 
 Le scope doit toujours préciser `backend/<module>`, `frontend/<module>`,
-`infra`, ou `root` — jamais un simple `type: ...`.
+`infra`, ou `root`, jamais un simple `type: ...`.
 
 Types : `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `style`, `perf`, `ci`.
 
