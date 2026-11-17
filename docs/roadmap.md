@@ -40,3 +40,4 @@
 ## Section 3 - Testing
 
 - [x] TEST-001 - Close per-file frontend coverage gaps (branches in the game store and canvas)
+- [x] TEST-002 - Enforce an 80% per-file coverage threshold in the frontend vitest config

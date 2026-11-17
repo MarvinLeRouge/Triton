@@ -40,3 +40,4 @@
 ## Section 3 - Tests
 
 - [x] TEST-001 - Combler les trous de couverture par fichier du frontend (branches du store de jeu et du canvas)
+- [x] TEST-002 - Imposer un seuil de couverture de 80 % par fichier dans la config vitest du frontend
