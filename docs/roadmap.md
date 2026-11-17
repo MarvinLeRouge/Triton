@@ -30,6 +30,7 @@
 - [x] CHORE-003 - Migrate the frontend to vitest 5
 - [x] CHORE-004 - Keep the Python base image on its current minor in Dependabot
 - [x] CI-001 - Run CI on the changelog bot PR so its auto-merge can complete
+- [x] CI-002 - Drop `--passWithNoTests` from the frontend CI test step
 
 ## Section 2 - Documentation
 
