@@ -15,6 +15,7 @@ export default mergeConfig(
         reporter: ['text', 'lcov'],
         include: ['src/**/*.{ts,vue}'],
         exclude: ['src/main.ts'],
+        thresholds: { perFile: true, lines: 80, functions: 80, branches: 80, statements: 80 },
       },
     },
   }),
