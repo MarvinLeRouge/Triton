@@ -158,6 +158,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Pin actions to current majors by sha (CI-003)
 
+- Leave the project out of the pip-audit export (CI-004)
+
 
 ## [0.6.0] - 2026-08-13
 
