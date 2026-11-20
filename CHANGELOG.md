@@ -160,6 +160,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Leave the project out of the pip-audit export (CI-004)
 
+- Raise the coverage floor to 85% (CI-005)
+
 
 ## [0.6.0] - 2026-08-13
 

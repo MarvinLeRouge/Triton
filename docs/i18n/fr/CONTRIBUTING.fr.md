@@ -30,7 +30,7 @@ uv run pytest              # backend
 cd frontend && npm run test:unit   # frontend
 ```
 
-Seuils de couverture (`codecov.yml`, bloquants) : projet 80 % (±2 %), patch 90 % (±5 %, backend et frontend).
+Seuils de couverture (`codecov.yml`, bloquants) : projet 85 % (±2 %), patch 90 % (±5 %, backend et frontend).
 
 ## Déroulement
 
