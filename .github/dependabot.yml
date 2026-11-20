@@ -16,6 +16,13 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
+    ignore:
+      # typescript-eslint does not support TypeScript 7 yet: lift once it does
+      - dependency-name: "typescript"
+        versions: [">= 7"]
+      # Node types follow the Node runtime major (Dockerfiles, CI node-version)
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     groups:
       vitest:
         patterns: ["vitest", "@vitest/*"]
@@ -40,6 +47,10 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
+    ignore:
+      # Node majors follow package.json engines and CI node-version, changed together on purpose
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
     groups:
       minor-and-patch:
         update-types: ["minor", "patch"]
@@ -50,5 +61,6 @@ updates:
       day: "monday"
     open-pull-requests-limit: 5
     groups:
-      minor-and-patch:
-        update-types: ["minor", "patch"]
+      # One weekly PR for every action bump, majors included
+      actions:
+        patterns: ["*"]
