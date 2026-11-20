@@ -29,6 +29,7 @@
 - [x] FIX-002 - Fix the vitest dev advisories in the frontend (@vitest/mocker)
 - [x] CHORE-003 - Migrate the frontend to vitest 5
 - [x] CHORE-004 - Keep the Python base image on its current minor in Dependabot
+- [x] CHORE-005 - Finish the Node 26 alignment (engines, @tsconfig/node26, architecture docs)
 - [x] CI-001 - Run CI on the changelog bot PR so its auto-merge can complete
 - [x] CI-002 - Drop `--passWithNoTests` from the frontend CI test step
 
