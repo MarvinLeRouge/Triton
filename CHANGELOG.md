@@ -154,6 +154,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Drop passWithNoTests from the vitest step
 
+- Finish the node 26 alignment (CHORE-005)
+
 
 ## [0.6.0] - 2026-08-13
 
