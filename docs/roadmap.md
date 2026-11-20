@@ -44,3 +44,4 @@
 - [x] TEST-002 - Enforce an 80% per-file coverage threshold in the frontend vitest config
 - [x] CI-003 - Pin every GitHub Action to its current major by commit SHA, changelog workflow on Node 26, align the Dependabot config (single actions group)
 - [x] CI-004 - Leave the project itself out of the pip-audit export (--no-emit-project)
+- [x] CI-005 - Raise the coverage floor from 80% to 85% (gates and docs)
