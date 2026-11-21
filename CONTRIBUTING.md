@@ -12,6 +12,7 @@ fixes, small improvements) are welcome but limited in scope.
 - [uv](https://docs.astral.sh/uv/) — Python package manager
 - Node.js ≥ 22
 - Docker with Compose v2 (`docker compose`), for the full stack via Traefik
+- [gitleaks](https://github.com/gitleaks/gitleaks): the pre-commit hook scans staged changes for secrets and refuses to commit without it
 
 ## Local setup
 

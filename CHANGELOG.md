@@ -162,6 +162,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Raise the coverage floor to 85% (CI-005)
 
+- Scan staged changes for secrets with gitleaks (CI-006)
+
 
 ## [0.6.0] - 2026-08-13
 
