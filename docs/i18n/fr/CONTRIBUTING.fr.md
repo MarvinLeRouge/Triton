@@ -13,6 +13,7 @@ bienvenues mais restent limitées en portée.
 - [uv](https://docs.astral.sh/uv/) : gestionnaire de paquets Python
 - Node.js ≥ 22
 - Docker avec Compose v2 (`docker compose`), pour la stack complète via Traefik
+- [gitleaks](https://github.com/gitleaks/gitleaks) : le hook pre-commit analyse les modifications indexées à la recherche de secrets et refuse de committer s'il est absent
 
 ## Installation locale
 
